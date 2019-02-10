@@ -24,5 +24,14 @@ namespace Aufgabe1
         {
             InitializeComponent();
         }
+
+        public WriteableBitmap writeableBitmap;
+        private void ViewPort_Loaded(object sender, RoutedEventArgs e)
+        {
+            int width = 500;
+            int height = 500;
+            PixelFormat pixelFormat = PixelFormats.Rgba64;
+            ViewPort.Source = writeableBitmap = (WriteableBitmap)BitmapSource.Create(width, height, 96, 96, PixelFormats.Rgba64, null, new int[width*height*pixelFormat.BitsPerPixel], 4);
+        }
     }
 }
