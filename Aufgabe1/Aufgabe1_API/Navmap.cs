@@ -7,6 +7,7 @@ namespace Aufgabe1_API
     public class Navmap
     {
         public Dictionary<Vector, Dictionary<Vector, double>> nodes;
+        public Dictionary<Vector, Vector> heuristic;
 
         public Navmap(Dictionary<Vector, Dictionary<Vector, double>> nodes)
         {
@@ -18,7 +19,49 @@ namespace Aufgabe1_API
             nodes = nodesList.ToDictionary(x => x.Key, x => x.Value.ToDictionary(y => y, y => y.Distance(x.Key)));
         }
 
-        public List<Vector> AStar(Vector start, Vector end) => ShortestPath(start, end, (node, shortest, distance) => distance[node] + node.Distance(end) < distance[shortest] + shortest.Distance(end));
+        public Dictionary<Vector, Vector> GenerateDijkstraHeuristic(Vector start)
+        {
+            List<Vector> priorityList = nodes.Select(x => x.Key).ToList();
+            Dictionary<Vector, double> distance = priorityList.ToDictionary(x => x, x => double.PositiveInfinity);
+            Dictionary<Vector, Vector> path = priorityList.ToDictionary(x => x, x => (Vector)null);
+            distance[start] = 0;
+
+            void Step(Vector current)
+            {
+                foreach (var connection in nodes[current])
+                {
+                    if (distance[connection.Key] > connection.Value + distance[current])
+                    {
+                        path[connection.Key] = current;
+                        distance[connection.Key] = connection.Value + distance[current];
+                    }
+                }
+
+                priorityList.Remove(current);
+            }
+
+            Step(start);
+
+            while (priorityList.Any())
+            {
+                Step(priorityList.First());
+            }
+
+            return path;
+        }
+
+        public List<Vector> Dijkstra(Vector start, Vector end)
+        {
+            List<Vector> finalPath = new List<Vector>();
+
+            for (Vector current = end; current != start; current = heuristic[current]) finalPath.Add(current);
+            finalPath.Add(start);
+            finalPath.Reverse();
+
+            return finalPath;
+        }
+
+        /*public List<Vector> AStar(Vector start, Vector end) => ShortestPath(start, end, (node, shortest, distance) => distance[node] + node.Distance(end) < distance[shortest] + shortest.Distance(end));
         public List<Vector> Dijkstra(Vector start, Vector end) => ShortestPath(start, end, (node, shortest, distance) => distance[node] < distance[shortest]);
 
         private List<Vector> ShortestPath(Vector start, Vector end, Func<Vector, Vector, Dictionary<Vector, double>, bool> comparer)
@@ -53,6 +96,6 @@ namespace Aufgabe1_API
                     }
                 }
             }
-        }
+        }*/
     }
 }
