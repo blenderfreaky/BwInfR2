@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Aufgabe1_API.Vector;
 
 namespace Aufgabe1_API
 {
@@ -20,37 +21,65 @@ namespace Aufgabe1_API
             this.y = y;
         }
 
-        public double Distance(Vector other)
-        {
-            return Math.Sqrt(Math.Pow(x - other.x, 2) + Math.Pow(y - other.y, 2));
-        }
+        public double Distance(Vector other) => Math.Sqrt(Math.Pow(x - other.x, 2) + Math.Pow(y - other.y, 2));
+        
+        public double MagnitudeSquared() => Math.Pow(x, 2) + Math.Pow(y, 2);
+        public double Magnitude() => Math.Sqrt(MagnitudeSquared());
 
-        public double Magnitude()
-        {
-            return Math.Sqrt(MagnitudeSquared());
-        }
+        public double Dot(Vector other) => x * other.x + y * other.y;
+        public static double Dot(Vector vec, Vector other) => vec.x * other.x + vec.y * other.y;
 
-        public double MagnitudeSquared()
-        {
-            return Math.Pow(x, 2) + Math.Pow(y, 2);
-        }
+        //public Vector Cross(Vector other) => x * other.y - y * other.x;
+        public static Vector Cross(Vector vec, Vector other) => new Vector(vec.y-other.y, -(vec.x-other.x));
 
-        public static double Dot(this Vector vec, Vector other)
-        {
-            return vec.x * other.x + vec.y * other.y;
-        }
+        public Vector Normalize() => this/Magnitude();
+        public static Vector Normalize(Vector vec) => vec / vec.Magnitude();
 
-        public static Vector operator -(Vector a, Vector b)
-        {
-            return new Vector();
-        }
+        public static Vector operator +(Vector a, Vector b) => new Vector(a.x + b.x, a.y + b.y);
+        public static Vector operator -(Vector vec) => new Vector(-vec.x, -vec.y);
+        public static Vector operator -(Vector a, Vector b) => new Vector(a.x - b.x, a.y - b.y);
+        public static Vector operator *(Vector a, Vector b) => new Vector(a.x * b.x, a.y * b.y);
+        public static Vector operator *(Vector a, double b) => new Vector(a.x * b, a.y * b);
+        public static Vector operator /(Vector a, Vector b) => new Vector(a.x / b.x, a.y / b.y);
+        public static Vector operator /(Vector a, double b) => new Vector(a.x / b, a.y / b);
 
         #region Intersection
         //Algorithm from https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
-        public static bool CounterclockwiseOrder(Vector a, Vector b, Vector c) => (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x);
-        public static bool IntersectingLines(Vector startA, Vector endA, Vector startB, Vector endB) => 
-            CounterclockwiseOrder(startA, startB, endB) != CounterclockwiseOrder(endA, startB, endB) &&
-            CounterclockwiseOrder(startA, endA, startB) != CounterclockwiseOrder(startA, endA, endB);
+        public enum VectorOrder
+        {
+            Colinear,
+            Clockwise,
+            Counterclockwise,
+        }
+        public static VectorOrder Orientation(Vector a, Vector b, Vector c)
+        {
+            double orientation = (c.y - a.y) * (b.x - a.x) - (b.y - a.y) * (c.x - a.x);
+
+            if (orientation < 00) return VectorOrder.Clockwise;
+            if (orientation == 0) return VectorOrder.Colinear;
+            if (orientation > 00) return VectorOrder.Counterclockwise;
+
+            throw new NotFiniteNumberException();
+        }
+        public static bool IntersectingLines(Vector startA, Vector endA, Vector startB, Vector endB)
+        {
+            //if (startA == startB && endA == endB || startA == endB && endA == startB) return true;
+
+            VectorOrder sAsBeB = Orientation(startA, startB, endB);
+            VectorOrder eAsBeB = Orientation(endA, startB, endB);
+            VectorOrder sAeAsB = Orientation(startA, endA, startB);
+            VectorOrder sAeAeB = Orientation(startA, endA, endB);
+
+            return (sAsBeB != eAsBeB && sAeAsB != sAeAeB)
+                  && !(sAeAeB == VectorOrder.Colinear || eAsBeB == VectorOrder.Colinear || sAeAsB == VectorOrder.Colinear || sAeAeB == VectorOrder.Colinear);
+            //    || sAsBeB == VectorOrder.Colinear 
+            //    || eAsBeB == VectorOrder.Colinear 
+            //    || sAeAsB == VectorOrder.Colinear
+            //    || sAeAeB == VectorOrder.Colinear;
+        }
         #endregion
+
+        public override bool Equals(object obj) => obj is Vector vec ? vec.x == x && vec.y == y : false;
+        public override string ToString() => $"x: {x} y: {y}";
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SomeExtensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,57 +10,129 @@ namespace Aufgabe1_API
     public class Map
     {
         public Vector[][] polygons;
-
         public Vector[] busPath;
-        public double busSpeed;
-
         public Vector startingPosition;
+
+        public double busSpeed;
         public double characterSpeed;
-        public double securityDistance;
 
         public Navmap navmap;
 
-        public void GenerateNavmap()
+        public Map(string[] lines)
         {
-            List<Vector> allDots = polygons.SelectMany(x => x).ToList();
-            allDots.Add(startingPosition);
-            foreach (Vector dot in new List<Vector>(allDots))
+            int polygonCount = int.Parse(lines[0]);
+            polygons = new Vector[polygonCount][];
+
+            for (int i = 0; i < polygonCount; i++)
             {
-                for (int i = 0; i < busPath.Length - 1; i++)
+                int[] polygon = lines[i + 1].Split().Select(x => int.Parse(x)).ToArray();
+               polygons[i] = new Vector[polygon[0]];
+
+                for (int j = 0; j < polygon[0]; j++) polygons[i][j] = new Vector(polygon[j*2+1], polygon[j*2+2]);
+            }
+
+            int[] start = lines[polygonCount + 1].Split().Select(x => int.Parse(x)).ToArray();
+            startingPosition = new Vector(start[0], start[1]);
+
+            busPath = new Vector[] { new Vector(0,0), new Vector(0, 10000) };
+        }
+
+        public IEnumerable<Vector> GenerateNavmap()
+        {
+            List<Vector> allDots = new List<Vector>();
+            Dictionary<Vector, (Vector, Vector)> neighbours = new Dictionary<Vector, (Vector, Vector)>();
+            foreach (var poly in polygons)
+            {
+                for (int i = 0; i < poly.Length; i++)
                 {
-                    Vector a = busPath[i];
-                    Vector b = busPath[i+1];
+                    (Vector, Vector) neighbour = (poly[(i - 1 + poly.Length) % poly.Length], poly[(i + 1) % poly.Length]);
+                    neighbours.Add(poly[i], neighbour);
+                    allDots.Add(poly[i]);// + Vector.Cross(neighbour.Item1 - poly[i], neighbour.Item2 - poly[i]).Normalize() * 1);// * (Vector.Orientation(neighbour.Item1, poly[i], neighbour.Item2) == Vector.VectorOrder.Counterclockwise ? -1 : 1));
+                }
+            }
+            
+            allDots.Add(startingPosition);
+            
+            Dictionary<Vector, List<Vector>> nodes = new Dictionary<Vector, List<Vector>>(); 
 
-                    Vector AP = dot - a;
-                    Vector AB = b - a;
+            for (int i = 0; i < allDots.Count; i++)
+            {
+                Vector vec = allDots[i];
+                List<Vector> connections = nodes.GetValueOrAddDefault(vec, new List<Vector>());//[vec] ?? (nodes[vec] = new List<Vector>());
+                var neighbour = neighbours.GetValueOrDefault(vec, (null, null));
 
-                    double magnitudeAB = AB.MagnitudeSquared();
-                    double ABAPproduct = Vector.Dot(AP, AB);    //The DOT product of a_to_p and a_to_b     
-                    double distance = ABAPproduct / magnitudeAB; //The normalized "distance" from a to your closest point  
-
-                    if (distance < 0)     //Check if P projection is over vectorAB     
+                Vector other;
+                for (int j = i + 1; j < allDots.Count; j++)
+                {
+                    if (connections.Contains(other = allDots[j])) continue;
+                    if (neighbour.Item1 == other || neighbour.Item2 == other || PossiblePath(vec, other))
                     {
-                        return a;
-
+                        nodes.GetValueOrAddDefault(vec, new List<Vector>()).AddIfNew(vec);
+                        connections.AddIfNew(other);
                     }
-                    else if (distance > 1)
+                }
+                foreach (Vector endPoint in GetExtra(vec))
+                {
+                    if (PossiblePath(vec, endPoint))
                     {
-                        return b;
-                    }
-                    else
-                    {
-                        return a + AB * distance;
+                        (nodes[endPoint] = new List<Vector>()).AddIfNew(vec);
+                        connections.AddIfNew(endPoint);
+                        yield return endPoint;
                     }
                 }
             }
-            Dictionary<Vector, List<Vector>> nodes = allDots.ToDictionary(x => x, x => allDots.Where(y => x != y && PossiblePath(x, y)).ToList());
+
             navmap = new Navmap(nodes);
             navmap.heuristic = navmap.GenerateDijkstraHeuristic(startingPosition);
         }
 
+        public IEnumerable<Vector> GetExtra(Vector dot)
+        {
+            for (int i = 0; i < busPath.Length - 1; i++)
+            {
+                Vector pathToBus = dot - busPath[i];
+                Vector busPathNormal = busPath[i + 1] - busPath[i];
+
+                double distance = Vector.Dot(pathToBus, busPathNormal) / busPathNormal.MagnitudeSquared();
+
+                if (distance < 0) yield return busPath[i];
+                if (distance > 1) yield return busPath[i + 1];
+
+                yield return busPath[i] + busPathNormal * distance;
+            }
+        }
+
+        public void Solve()
+        {
+
+        }
+
+        /// <summary>
+        /// Checks whether a point is inside a polygon, using the even-odd rule
+        /// </summary>
+        public bool PointInPolygon(Vector point, Vector[] poly)
+        {
+            Vector rayOrigin = new Vector(poly.Min(x => x.x), poly.Min(x => x.y));
+
+            int intersectionCounter = poly.Contains(rayOrigin) ? 1 : 0;
+            for (int i = 0; i < poly.Length; i++)
+                if (Vector.IntersectingLines(rayOrigin, point, poly[i], poly[(i + 1) % poly.Length]))
+                    intersectionCounter++;
+
+            return intersectionCounter % 2 == 1;
+        }
+
         public bool PossiblePath(Vector a, Vector b)
         {
-            foreach (var poly in polygons) for (int i = 0; i <= poly.Length; i++) if (Vector.IntersectingLines(a, b, poly[i], poly[(i+1)%poly.Length])) return false;
+            foreach (var poly in polygons)
+            {
+                for (int i = 0; i < poly.Length; i++)
+                    if (Vector.IntersectingLines(a, b, poly[i], poly[(i + 1) % poly.Length]))
+                        return false;
+
+                if (PointInPolygon((a + b) / 2, poly))
+                    return false;
+            }
             return true;
         }
     }
