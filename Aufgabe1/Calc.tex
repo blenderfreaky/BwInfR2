@@ -1,0 +1,86 @@
+\documentclass[10pt]{article}
+\usepackage{amsmath}
+
+\begin{document}
+
+\newcommand{\vb}{v_{Bus}}
+\newcommand{\vl}{v_{Lisa}}
+\newcommand{\te}{t(\theta)}
+\newcommand{\dt}[1]{\frac{d#1}{d\theta}}
+\newcommand{\dte}{\dt{\te}}
+
+\newcommand{\x}{x}
+
+\renewcommand{\a}{a}
+\renewcommand{\b}{b}
+\renewcommand{\c}{c}
+
+\newcommand{\f}{f}
+
+\newcommand{\tf}{t(\f)}
+\newcommand{\df}[1]{\frac{d#1}{d\f}}
+\newcommand{\dtf}{\dt{\tf}}
+
+\newcommand{\abs}[1]{\lvert #1 \rvert}
+%\newcommand{}{}
+%\newcommand{}{}
+
+\begin{align*}
+\te &= \vl\sqrt{\x^2+(\x\tan\theta)^2}-\vb\x\tan\theta\\
+&= \vl\x\sqrt{1+\tan^2\theta}-\vb\x\tan\theta\\
+&= \vl\x\sqrt{\frac{1}{\cos\theta}}-\vb\x\tan\theta\\
+&= \vl\frac{\x}{\sqrt{\cos\theta}}-\vb\x\tan\theta\\
+\end{align*}
+
+\begin{align*}
+\dte &= \dt{\vl\frac{\x}{\sqrt{\cos\theta}}-\vb\x\tan\theta}\\
+&=\vl\frac{\dt{\x}\sqrt{\cos\theta}-\x\dt{\sqrt{\cos\theta}}}{\sqrt{\cos\theta}^2}-\vb\x\dt{\tan\theta}\\
+&=\vl\frac{-\x}{\sqrt{\cos\theta}^2}\cdot\frac{1}{2\sqrt{\cos\theta}}\cdot\dt{\cos\theta}-\frac{\vb\x}{\cos^2\theta}\\
+&=\vl\frac{\x\sin\theta}{2\cos^{\frac{3}{2}}\theta}-\vb\frac{\x}{\cos^2\theta}\\
+\end{align*}
+
+\begin{align*}
+&&\dte &= 0\\
+\iff&&\vl\frac{\x\sin\theta}{2\cos^{\frac{3}{2}}\theta}-\vb\frac{\x}{\cos^2\theta} &= 0\\
+\iff&&\vl\frac{\x\sin\theta}{2\cos^{\frac{3}{2}}\theta} &= \vb\frac{\x}{\cos^2\theta}\\
+\iff&&\vl\frac{\sin\theta}{\cos^{\frac{3}{2}}\theta} &= \vb\frac{2}{\cos^2\theta}\\
+\iff&&\sin\theta\sqrt{\cos\theta} &= 2\frac{\vb}{\vl}\\
+\iff&&\frac{\sin\theta\cos\theta}{\sqrt{\cos\theta}} &= 2\frac{\vb}{\vl}\\
+\iff&&\frac{\sin2\theta}{\sqrt{\cos\theta}} &= 4\frac{\vb}{\vl}\\
+\end{align*}
+
+\newpage
+
+\[\b=\a\f\]
+\[\c=\sqrt{\a^2+\b^2}\]
+
+\begin{align*}
+\tf &= \frac{\c-\a}{\vl} - \frac{\b}{\vb}\\
+&= \frac{\sqrt{\a^2+\b^2}-\a}{\vl} - \frac{\a\f}{\vb}\\
+&= \frac{\sqrt{\a^2(1+\f^2)}-\a}{\vl} - \frac{\a\f}{\vb}\\
+&= \a\left(\frac{\sqrt{1+\f^2}-1}{\vl} - \frac{\f}{\vb}\right)\\
+\end{align*}
+
+\begin{align*}
+\dtf &= \df{\a\left(\frac{\sqrt{1+\f^2}-1}{\vl} - \frac{\f}{\vb}\right)}\\
+&= \a\left(\df{\frac{\sqrt{1+\f^2}-1}{\vl}} - \df{\frac{\f}{\vb}}\right)\\
+&= \a\left(\frac{\df{\sqrt{1+\f^2}}}{\vl} - \frac{\df{\f}}{\vb}\right)\\
+&= \a\left(\frac{\frac{1}{2\sqrt{1+\f^2}}\cdot\df{1+\f^2}}{\vl} - \frac{1}{\vb}\right)\\
+&= \a\left(\frac{f}{\vl\sqrt{1+\f^2}} - \frac{1}{\vb}\right)\\
+\end{align*}
+
+\begin{align*}
+&&\dtf &= 0\\
+\iff&&\a\left(\frac{f}{\vl\sqrt{1+\f^2}} - \frac{1}{\vb}\right) &= 0\\
+\iff&&\a\frac{f}{\vl\sqrt{1+\f^2}} &= \a\frac{1}{\vb}\\
+\iff&&\frac{f}{\sqrt{1+\f^2}} &= \frac{\vl}{\vb}\\
+\iff&&\left(\frac{f}{\sqrt{1+\f^2}}\right)^2 &= \left(\frac{\vl}{\vb}\right)^2\\
+\iff&&\frac{f^2}{1+\f^2} &= \frac{\vl^2}{\vb^2}\\
+\iff&&\frac{1+\f^2}{f^2} &= \frac{\vb^2}{\vl^2}\\
+\iff&&\frac{1}{f^2} &= \frac{\vb^2-\vl^2}{\vl^2}\\
+\iff&&f^2 &= \frac{\vl^2}{\vb^2-\vl^2}\\
+\iff&&f &= \sqrt{\frac{\vl^2}{\vb^2-\vl^2}}\\
+\iff&&f &= \frac{\vl}{\sqrt{\vb^2-\vl^2}}\\
+\end{align*}
+
+\end{document}
