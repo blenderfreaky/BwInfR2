@@ -9,7 +9,11 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <material:PanBorder>
-            <Canvas x:Name="ViewPort" Margin="0" Loaded="ViewPort_Loaded"/>
+            <Grid Background="White" MouseMove="Navmap_Move">
+                <Canvas x:Name="Navmap" Margin="0" Loaded="Navmap_Loaded"/>
+                <Canvas x:Name="Polygons" Margin="0" Loaded="Polygons_Loaded"/>
+                <Canvas x:Name="Buspath" Margin="0" Loaded="Buspath_Loaded"/>
+            </Grid>
         </material:PanBorder>
     </Grid>
 </material:MaterialWindow>

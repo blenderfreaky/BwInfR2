@@ -46,7 +46,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Map.cs" />
-    <Compile Include="Navmap.cs" />
+    <Compile Include="LEGACY\Map_LEGACY.cs" />
+    <Compile Include="LEGACY\Navmap.cs" />
+    <Compile Include="Polygon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Vector.cs" />
   </ItemGroup>

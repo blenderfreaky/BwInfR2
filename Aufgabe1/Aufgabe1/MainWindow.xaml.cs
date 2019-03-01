@@ -27,35 +27,35 @@ namespace Aufgabe1
 
         public MainWindow()
         {
-            string root = "../../../../Examples/Aufgabe1/";
-            map = new Map(File.ReadAllLines(root + "lisarennt3.txt"));
-            map.GenerateNavmap().ToList();
+            //string root = "../../../../Examples/Aufgabe1/";
+            //map = new Map(File.ReadAllLines(root + "lisarennt3.txt"));
+            //map.GenerateNavmap().ToList();
+
+            map = new Map(new Aufgabe1_API.Polygon[] { new Aufgabe1_API.Polygon(new Aufgabe1_API.Vector[] { new Aufgabe1_API.Vector(50, 50), new Aufgabe1_API.Vector(50, 100), new Aufgabe1_API.Vector(100, 100), new Aufgabe1_API.Vector(100, 50) }) }, new Aufgabe1_API.Vector[] { new Aufgabe1_API.Vector(0, 0), new Aufgabe1_API.Vector(0, 1000000) }, new Aufgabe1_API.Vector(50, 150), 30, 15);
 
             InitializeComponent();
         }
 
-        public WriteableBitmap writeableBitmap;
-        private void ViewPort_Loaded(object sender, RoutedEventArgs e)
+        private void Polygons_Loaded(object sender, RoutedEventArgs e)
         {
-            DrawMap(map);
+            foreach (var polygon in map.polygons)
+                Polygons.Children.Add(
+                    new System.Windows.Shapes.Polygon
+                    {
+                        Stroke = Brushes.Black,
+                        Fill = Brushes.Transparent,
+                        StrokeThickness = 2,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+
+                        Points = new PointCollection(polygon.vertices.Select(x => new Point(x.vector.x, x.vector.y))),
+                    });
         }
 
-        public void DrawMap(Map map)
+        private void Buspath_Loaded(object sender, RoutedEventArgs e)
         {
-            foreach (var polygon in map.polygons) ViewPort.Children.Add(
-                new Polygon
-                {
-                    Stroke = Brushes.Black,
-                    Fill = Brushes.Transparent,
-                    StrokeThickness = 2,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    
-                    Points = new PointCollection(polygon.Select(x => new Point(x.x, x.y))),
-                });
-
-            ViewPort.Children.Add(
-                new Polygon
+            Buspath.Children.Add(
+                new System.Windows.Shapes.Polygon
                 {
                     Stroke = Brushes.Blue,
                     Fill = Brushes.Transparent,
@@ -65,9 +65,19 @@ namespace Aufgabe1
 
                     Points = new PointCollection(map.busPath.Select(x => new Point(x.x, x.y))),
                 });
+        }
 
+        private void Navmap_Loaded(object sender, RoutedEventArgs e) => DrawNavmap();
+        private void Navmap_Move(object sender, RoutedEventArgs e) => DrawNavmap();
 
-            foreach (var origin in map.navmap.nodes) foreach (var target in origin.Value) ViewPort.Children.Add(
+        private void DrawNavmap()
+        {
+            Point mousePositionPoint = Mouse.GetPosition(Navmap);
+            Aufgabe1_API.Vector mousePosition = new Aufgabe1_API.Vector(mousePositionPoint.X, mousePositionPoint.Y);
+
+            Navmap.Children.Clear();
+            foreach (var origin in map.GenerateVisibilityGraph(mousePosition))
+                Navmap.Children.Add(
                 new Line
                 {
                     Stroke = Brushes.Red,
@@ -79,13 +89,9 @@ namespace Aufgabe1
                     X1 = origin.Key.x,
                     Y1 = origin.Key.y,
 
-                    X2 = target.Key.x,
-                    Y2 = target.Key.y,
+                    X2 = mousePosition.x,
+                    Y2 = mousePosition.y,
                 });
-            //int width = map.;
-            //int height = 500;
-            //PixelFormat pixelFormat = PixelFormats.Rgba64;
-            //ViewPort.Source = writeableBitmap = (WriteableBitmap)BitmapSource.Create(width, height, 96, 96, PixelFormats.Rgba64, null, new int[width * height * pixelFormat.BitsPerPixel], 4);
         }
     }
 }

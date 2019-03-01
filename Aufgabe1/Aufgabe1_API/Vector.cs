@@ -21,6 +21,10 @@ namespace Aufgabe1_API
             this.y = y;
         }
 
+        public double Angle() => Fix(Math.Atan2(y, x));
+        public double Angle(Vector origin) => Fix(Math.Atan2(y-origin.y, x-origin.x));
+        private double Fix(double angle) => angle < 0 ? Fix(angle + 2 * Math.PI) : angle % 2 * Math.PI;
+
         public double Distance(Vector other) => Math.Sqrt(Math.Pow(x - other.x, 2) + Math.Pow(y - other.y, 2));
         
         public double MagnitudeSquared() => Math.Pow(x, 2) + Math.Pow(y, 2);
@@ -80,6 +84,15 @@ namespace Aufgabe1_API
         #endregion
 
         public override bool Equals(object obj) => obj is Vector vec ? vec.x == x && vec.y == y : false;
+
+        public override int GetHashCode()
+        {
+            var hashCode = 1502939027;
+            hashCode = hashCode * -1521134295 + x.GetHashCode();
+            hashCode = hashCode * -1521134295 + y.GetHashCode();
+            return hashCode;
+        }
+
         public override string ToString() => $"x: {x} y: {y}";
     }
 }
