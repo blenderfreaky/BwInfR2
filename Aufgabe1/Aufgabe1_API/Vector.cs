@@ -23,7 +23,12 @@ namespace Aufgabe1_API
 
         public double Angle() => Fix(Math.Atan2(y, x));
         public double Angle(Vector origin) => Fix(Math.Atan2(y-origin.y, x-origin.x));
-        private double Fix(double angle) => angle < 0 ? Fix(angle + 2 * Math.PI) : angle % 2 * Math.PI;
+        private double Fix(double angle)
+        {
+            while (angle < 0) angle += Math.PI * 2;
+            while (angle > Math.PI * 2) angle -= Math.PI * 2;
+            return angle;
+        }
 
         public double Distance(Vector other) => Math.Sqrt(Math.Pow(x - other.x, 2) + Math.Pow(y - other.y, 2));
         

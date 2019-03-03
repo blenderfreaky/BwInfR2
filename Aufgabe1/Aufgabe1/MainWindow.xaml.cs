@@ -15,6 +15,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Polygon = Aufgabe1_API.Polygon;
+using Vector = Aufgabe1_API.Vector;
 
 namespace Aufgabe1
 {
@@ -27,11 +29,19 @@ namespace Aufgabe1
 
         public MainWindow()
         {
-            //string root = "../../../../Examples/Aufgabe1/";
-            //map = new Map(File.ReadAllLines(root + "lisarennt3.txt"));
-            //map.GenerateNavmap().ToList();
-
-            map = new Map(new Aufgabe1_API.Polygon[] { new Aufgabe1_API.Polygon(new Aufgabe1_API.Vector[] { new Aufgabe1_API.Vector(50, 50), new Aufgabe1_API.Vector(50, 100), new Aufgabe1_API.Vector(100, 100), new Aufgabe1_API.Vector(100, 50) }) }, new Aufgabe1_API.Vector[] { new Aufgabe1_API.Vector(0, 0), new Aufgabe1_API.Vector(0, 1000000) }, new Aufgabe1_API.Vector(50, 150), 30, 15);
+            string root = "../../../../Examples/Aufgabe1/";
+            map = new Map(File.ReadAllLines(root + "lisarennt3.txt"));
+            
+            /**/
+            map = new Map(new Polygon[] 
+                {
+                    new Polygon(new Vector[] {new Vector(50, 50), new Vector(50, 100), new Vector(100, 100), new Vector(100, 50), }),
+                    new Polygon(new Vector[] {new Vector(150, 50), new Vector(150, 100), new Vector(200, 100), new Vector(200, 50), }),
+                }, 
+                new Vector[] { new Vector(0, 0), new Vector(0, 1000000) }, 
+                new Vector(50, 150), 
+                30, 15);
+            /**/
 
             InitializeComponent();
         }
@@ -69,11 +79,15 @@ namespace Aufgabe1
 
         private void Navmap_Loaded(object sender, RoutedEventArgs e) => DrawNavmap();
         private void Navmap_Move(object sender, RoutedEventArgs e) => DrawNavmap();
-
+        private void Navmap_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            DrawNavmap();
+        }
         private void DrawNavmap()
         {
             Point mousePositionPoint = Mouse.GetPosition(Navmap);
             Aufgabe1_API.Vector mousePosition = new Aufgabe1_API.Vector(mousePositionPoint.X, mousePositionPoint.Y);
+            //Aufgabe1_API.Vector mousePosition = new Aufgabe1_API.Vector(148, 141);
 
             Navmap.Children.Clear();
             foreach (var origin in map.GenerateVisibilityGraph(mousePosition))

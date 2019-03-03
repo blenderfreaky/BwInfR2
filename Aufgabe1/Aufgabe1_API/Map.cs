@@ -60,53 +60,41 @@ namespace Aufgabe1_API
             }
         }
 
-        //public List<Vector> GetPath()
-        //{
-
-        //}
-
-
-
         public Dictionary<Vector, double> GenerateVisibilityGraph(Vector origin)
         {
             List<Vector> visibilityGraph = new List<Vector>();
             List<PolygonVertex> allDots = this.allDots.Where(x => x.vector != origin).ToList();
             Dictionary<PolygonVertex, double> angles = allDots.ToDictionary(x => x, x => x.vector.Angle(origin));
 
-            double currentAngle = 0;
-            Func<double> GetCurrentAngle = () => currentAngle;
-
-            Comparer<PolygonVertex> comparer = Comparer<PolygonVertex>.Create(
-                (a, b) => DistanceToLineAtAngle(origin, GetCurrentAngle(), a).CompareTo(DistanceToLineAtAngle(origin, GetCurrentAngle(), b)));
-            //SortedSet<PolygonVertex> tree = new SortedSet<PolygonVertex>(comparer);
-            List<PolygonVertex> tree = new List<PolygonVertex>();
+            List<PolygonVertex> intersections = new List<PolygonVertex>();
 
             foreach (PolygonVertex polygonVertex in allDots)
             {
                 Vector a = polygonVertex.vector - origin;
                 Vector b = polygonVertex.polygon[polygonVertex.index + 1].vector - origin;
 
-                if ((a.y == 0 && b.y == 0 && (a.x > 0 || b.x > 0)) 
-                 || a.x >= a.y * (a.x - b.x) / (b.y - a.y)) tree.Add(polygonVertex);
+                if ((a.x > 0 || b.x > 0) && a.y * b.y <= 0 &&
+                    (a.y == b.y ? 
+                    a.y == 0
+                  : (a.x >= a.y * (b.x - a.x) / (b.y - a.y)))) intersections.Add(polygonVertex);
             }
-
+            //return intersections.Select(x => (x.vector + x.polygon[x.index+1].vector) / 2).Distinct().ToDictionary(x => x, x => x.Distance(origin));
             foreach (PolygonVertex polygonVertex in allDots.OrderBy(x => angles[x]))
             {
                 PolygonVertex left = polygonVertex.polygon[polygonVertex.index - 1];
                 PolygonVertex right = polygonVertex.polygon[polygonVertex.index + 1];
 
-                PolygonVertex front = tree.First();
+                double currentAngle = angles[polygonVertex];
 
-                if (front.vector == left.vector) visibilityGraph.Add(polygonVertex.vector);
-                if (front.vector == polygonVertex.vector) visibilityGraph.Add(polygonVertex.vector);
+                double dist = origin.Distance(polygonVertex.vector);
+                if (intersections.All(x => x == polygonVertex || x.polygon[x.index + 1] == polygonVertex || DistanceToLineAtAngle(origin, currentAngle, x) >= dist))
+                    visibilityGraph.Add(polygonVertex.vector);
 
-                currentAngle = angles[polygonVertex];
+                if (angles[left] < currentAngle) intersections.RemoveAll(x => x == left);
+                else if (!intersections.Contains(left)) intersections.Add(left);
 
-                if (angles[left] < currentAngle) tree.Remove(left);
-                else AddSorted(tree, left, comparer);
-
-                if (angles[right] < currentAngle) tree.Remove(polygonVertex);
-                else AddSorted(tree, polygonVertex, comparer);
+                if (angles[right] < currentAngle) intersections.RemoveAll(x => x == polygonVertex);
+                else if (!intersections.Contains(polygonVertex)) intersections.Add(polygonVertex);
             }
 
             if (PossiblePath(origin, startingPosition)) visibilityGraph.Add(startingPosition);
@@ -116,11 +104,12 @@ namespace Aufgabe1_API
             return visibilityGraph.Distinct().ToDictionary(x => x, x => x.Distance(origin));
         }
 
-        private static void AddSorted<T>(List<T> list, T elem, Comparer<T> comp)
+        public double DistanceToLineAtAngle(Vector origin, double angle, PolygonVertex segment)
         {
-            int i = -1;
-            while (++i < list.Count && comp.Compare(list[i], elem) == -1);
-            list.Insert(i, elem);
+            Vector a = segment.vector - origin;
+            Vector b = segment.polygon[segment.index + 1].vector - origin;
+
+            return ((a.y - b.y) * b.x - (a.x - b.x) * b.y) / (Math.Cos(angle) * (a.y - b.y) - Math.Sin(angle) * (a.x - b.x));
         }
 
         public Vector PointToLineAtAngle(Vector origin, double angle, PolygonVertex segment)
@@ -128,12 +117,11 @@ namespace Aufgabe1_API
             return new Vector(Math.Cos(angle), Math.Sin(angle)) * DistanceToLineAtAngle(origin, angle, segment);
         }
 
-        public double DistanceToLineAtAngle(Vector origin, double angle, PolygonVertex segment)
+        private static void AddSorted<T>(List<T> list, T elem, Comparer<T> comp)
         {
-            Vector a = segment.vector - origin;
-            Vector b = segment.polygon[segment.index + 1].vector - origin;
-
-            return ((a.y - b.y) * b.x - (a.x - b.x) * b.y) / (Math.Cos(angle) * (a.y - b.y) - Math.Sin(angle) * (a.x - b.x));
+            int i = -1;
+            while (++i < list.Count && comp.Compare(list[i], elem) == -1) ;
+            list.Insert(i, elem);
         }
 
         public bool PossiblePath(Vector a, Vector b)
