@@ -9,7 +9,7 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <material:PanBorder>
-            <Grid Background="White" MouseMove="Navmap_Move" MouseDown="Navmap_MouseDown">
+            <Grid Background="White" MouseMove="Navmap_Move">
                 <Grid Margin="100">
                     <Canvas x:Name="Navmap" Margin="0" Loaded="Navmap_Loaded"/>
                     <Canvas x:Name="Polygons" Margin="0" Loaded="Polygons_Loaded"/>

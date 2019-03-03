@@ -32,7 +32,7 @@ namespace Aufgabe1
             string root = "../../../../Examples/Aufgabe1/";
             map = new Map(File.ReadAllLines(root + "lisarennt3.txt"));
             
-            /**/
+            /**
             map = new Map(new Polygon[] 
                 {
                     new Polygon(new Vector[] {new Vector(50, 50), new Vector(50, 100), new Vector(100, 100), new Vector(100, 50), }),
@@ -58,7 +58,7 @@ namespace Aufgabe1
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Center,
 
-                        Points = new PointCollection(polygon.vertices.Select(x => new Point(x.vector.x, x.vector.y))),
+                        Points = new PointCollection(polygon.vertices.Select(x => new Point(x.vector.x, -x.vector.y))),
                     });
         }
 
@@ -73,21 +73,17 @@ namespace Aufgabe1
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center,
 
-                    Points = new PointCollection(map.busPath.Select(x => new Point(x.x, x.y))),
+                    Points = new PointCollection(map.busPath.Select(x => new Point(x.x, -x.y))),
                 });
         }
 
         private void Navmap_Loaded(object sender, RoutedEventArgs e) => DrawNavmap();
         private void Navmap_Move(object sender, RoutedEventArgs e) => DrawNavmap();
-        private void Navmap_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            DrawNavmap();
-        }
         private void DrawNavmap()
         {
             Point mousePositionPoint = Mouse.GetPosition(Navmap);
-            Aufgabe1_API.Vector mousePosition = new Aufgabe1_API.Vector(mousePositionPoint.X, mousePositionPoint.Y);
-            //Aufgabe1_API.Vector mousePosition = new Aufgabe1_API.Vector(148, 141);
+            Vector mousePosition = new Vector(mousePositionPoint.X, -mousePositionPoint.Y);
+            //Vector mousePosition = new Vector(148, 141);
 
             Navmap.Children.Clear();
             foreach (var origin in map.GenerateVisibilityGraph(mousePosition))
@@ -101,10 +97,10 @@ namespace Aufgabe1
                     HorizontalAlignment = HorizontalAlignment.Center,
 
                     X1 = origin.Key.x,
-                    Y1 = origin.Key.y,
+                    Y1 = -origin.Key.y,
 
                     X2 = mousePosition.x,
-                    Y2 = mousePosition.y,
+                    Y2 = -mousePosition.y,
                 });
         }
     }

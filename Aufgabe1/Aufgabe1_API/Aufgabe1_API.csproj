@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AngleHelper.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="LEGACY\Map_LEGACY.cs" />
     <Compile Include="LEGACY\Navmap.cs" />

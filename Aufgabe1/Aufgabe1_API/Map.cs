@@ -90,10 +90,10 @@ namespace Aufgabe1_API
                 if (intersections.All(x => x == polygonVertex || x.polygon[x.index + 1] == polygonVertex || DistanceToLineAtAngle(origin, currentAngle, x) >= dist))
                     visibilityGraph.Add(polygonVertex.vector);
 
-                if (angles[left] < currentAngle) intersections.RemoveAll(x => x == left);
+                if (AngleHelper.GetSide(angles[left], currentAngle) < 0) intersections.RemoveAll(x => x == left);
                 else if (!intersections.Contains(left)) intersections.Add(left);
 
-                if (angles[right] < currentAngle) intersections.RemoveAll(x => x == polygonVertex);
+                if (AngleHelper.GetSide(angles[right], currentAngle) < 0) intersections.RemoveAll(x => x == polygonVertex);
                 else if (!intersections.Contains(polygonVertex)) intersections.Add(polygonVertex);
             }
 

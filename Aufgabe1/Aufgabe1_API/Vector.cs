@@ -21,14 +21,8 @@ namespace Aufgabe1_API
             this.y = y;
         }
 
-        public double Angle() => Fix(Math.Atan2(y, x));
-        public double Angle(Vector origin) => Fix(Math.Atan2(y-origin.y, x-origin.x));
-        private double Fix(double angle)
-        {
-            while (angle < 0) angle += Math.PI * 2;
-            while (angle > Math.PI * 2) angle -= Math.PI * 2;
-            return angle;
-        }
+        public double Angle() => AngleHelper.ClampAngle(Math.Atan2(y, x));
+        public double Angle(Vector origin) => AngleHelper.ClampAngle(Math.Atan2(y-origin.y, x-origin.x));
 
         public double Distance(Vector other) => Math.Sqrt(Math.Pow(x - other.x, 2) + Math.Pow(y - other.y, 2));
         
