@@ -74,27 +74,45 @@ namespace Aufgabe1_API
                 Vector b = polygonVertex.polygon[polygonVertex.index + 1].vector - origin;
 
                 if ((a.x > 0 || b.x > 0) && a.y * b.y <= 0 &&
-                    (a.y == b.y ? 
+                    (a.y == b.y ?
                     a.y == 0
                   : (a.x >= a.y * (b.x - a.x) / (b.y - a.y)))) intersections.Add(polygonVertex);
             }
-            //return intersections.Select(x => (x.vector + x.polygon[x.index+1].vector) / 2).Distinct().ToDictionary(x => x, x => x.Distance(origin));
-            foreach (PolygonVertex polygonVertex in allDots.OrderBy(x => angles[x]))
+
+            IEnumerable<(double, IEnumerable<PolygonVertex>)> allDotsByAngles =
+                angles
+                .Select(x => x.Value)
+                .Distinct()
+                .OrderBy(x => x)
+                .Select(x =>
+                    (x,
+                    angles
+                    .Where(y => y.Value == x)
+                    .Select(y => y.Key)));
+
+            foreach ((double currentAngle, IEnumerable<PolygonVertex> vertices) in allDotsByAngles)
             {
-                PolygonVertex left = polygonVertex.polygon[polygonVertex.index - 1];
-                PolygonVertex right = polygonVertex.polygon[polygonVertex.index + 1];
+                foreach (PolygonVertex polygonVertex in vertices)
+                {
+                    PolygonVertex left = polygonVertex.polygon[polygonVertex.index - 1];
+                    PolygonVertex right = polygonVertex.polygon[polygonVertex.index + 1];
 
-                double currentAngle = angles[polygonVertex];
+                    double dist = origin.Distance(polygonVertex.vector);
+                    if (intersections.All(x => x == polygonVertex || x.polygon[x.index + 1] == polygonVertex || DistanceToLineAtAngle(origin, currentAngle, x) >= dist))
+                        visibilityGraph.Add(polygonVertex.vector);
+                }
 
-                double dist = origin.Distance(polygonVertex.vector);
-                if (intersections.All(x => x == polygonVertex || x.polygon[x.index + 1] == polygonVertex || DistanceToLineAtAngle(origin, currentAngle, x) >= dist))
-                    visibilityGraph.Add(polygonVertex.vector);
+                foreach (PolygonVertex polygonVertex in vertices)
+                {
+                    PolygonVertex left = polygonVertex.polygon[polygonVertex.index - 1];
+                    PolygonVertex right = polygonVertex.polygon[polygonVertex.index + 1];
 
-                if (AngleHelper.GetSide(angles[left], currentAngle) < 0) intersections.RemoveAll(x => x == left);
-                else if (!intersections.Contains(left)) intersections.Add(left);
+                    if (AngleHelper.GetSide(angles[left], currentAngle) < 0) intersections.RemoveAll(x => x == left);
+                    else if (!intersections.Contains(left)) intersections.Add(left);
 
-                if (AngleHelper.GetSide(angles[right], currentAngle) < 0) intersections.RemoveAll(x => x == polygonVertex);
-                else if (!intersections.Contains(polygonVertex)) intersections.Add(polygonVertex);
+                    if (AngleHelper.GetSide(angles[right], currentAngle) < 0) intersections.RemoveAll(x => x == polygonVertex);
+                    else if (!intersections.Contains(polygonVertex)) intersections.Add(polygonVertex);
+                }
             }
 
             if (PossiblePath(origin, startingPosition)) visibilityGraph.Add(startingPosition);

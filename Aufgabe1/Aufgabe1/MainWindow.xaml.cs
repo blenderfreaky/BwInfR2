@@ -58,7 +58,7 @@ namespace Aufgabe1
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Center,
 
-                        Points = new PointCollection(polygon.vertices.Select(x => new Point(x.vector.x, -x.vector.y))),
+                        Points = new PointCollection(polygon.vertices.Select(x => new Point(x.vector.x, x.vector.y))),
                     });
         }
 
@@ -73,7 +73,7 @@ namespace Aufgabe1
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center,
 
-                    Points = new PointCollection(map.busPath.Select(x => new Point(x.x, -x.y))),
+                    Points = new PointCollection(map.busPath.Select(x => new Point(x.x, x.y))),
                 });
         }
 
@@ -82,7 +82,7 @@ namespace Aufgabe1
         private void DrawNavmap()
         {
             Point mousePositionPoint = Mouse.GetPosition(Navmap);
-            Vector mousePosition = new Vector(mousePositionPoint.X, -mousePositionPoint.Y);
+            Vector mousePosition = new Vector(mousePositionPoint.X, mousePositionPoint.Y);
             //Vector mousePosition = new Vector(148, 141);
 
             Navmap.Children.Clear();
@@ -97,10 +97,10 @@ namespace Aufgabe1
                     HorizontalAlignment = HorizontalAlignment.Center,
 
                     X1 = origin.Key.x,
-                    Y1 = -origin.Key.y,
+                    Y1 = origin.Key.y,
 
                     X2 = mousePosition.x,
-                    Y2 = -mousePosition.y,
+                    Y2 = mousePosition.y,
                 });
         }
     }
