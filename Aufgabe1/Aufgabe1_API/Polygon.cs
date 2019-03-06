@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Aufgabe1_API
 {
@@ -21,6 +23,35 @@ namespace Aufgabe1_API
                 for (int i = 0; i < Length; i++) if (vertices[i].vector == vec) return i;
                 return -1;
             }
+        }
+
+        public void FixDirection()
+        {
+            PolygonVertex max = vertices[0];
+
+            foreach (PolygonVertex polygonVertex in vertices)
+            {
+                if (max.vector.y > polygonVertex.vector.y
+                 && max.vector.x <= polygonVertex.vector.x)
+                {
+                    max = polygonVertex;
+                }
+            }
+
+            Vector left = max.polygon.vertices[max.index - 1].vector;
+            Vector center = max.vector;
+            Vector right = max.polygon.vertices[max.index + 1].vector;
+
+            int direction = Math.Sign(
+                (center.x * right.y + left.x * center.y + left.y * right.x)
+              - (left.y * center.x + center.y * right.x + left.x * right.y));
+
+            if (direction == -1) Flip();
+        }
+
+        public void Flip()
+        {
+            vertices = vertices.Reverse().ToArray();
         }
     }
 

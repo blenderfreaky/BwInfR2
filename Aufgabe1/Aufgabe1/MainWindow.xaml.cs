@@ -86,6 +86,31 @@ namespace Aufgabe1
             //Vector mousePosition = new Vector(148, 141);
 
             Navmap.Children.Clear();
+            foreach (var origin in map.GenerateNavmap())
+                foreach (var target in origin.Value)
+                Navmap.Children.Add(
+                new Line
+                {
+                    Stroke = Brushes.Red,
+                    Fill = Brushes.Transparent,
+                    StrokeThickness = 0.2,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+
+                    X1 = origin.Key.x,
+                    Y1 = origin.Key.y,
+
+                    X2 = target.Key.x,
+                    Y2 = target.Key.y,
+                });
+        }/*
+        private void DrawNavmap()
+        {
+            Point mousePositionPoint = Mouse.GetPosition(Navmap);
+            Vector mousePosition = new Vector(mousePositionPoint.X, mousePositionPoint.Y);
+            //Vector mousePosition = new Vector(148, 141);
+
+            Navmap.Children.Clear();
             foreach (var origin in map.GenerateVisibilityGraph(mousePosition))
                 Navmap.Children.Add(
                 new Line
@@ -102,6 +127,6 @@ namespace Aufgabe1
                     X2 = mousePosition.x,
                     Y2 = mousePosition.y,
                 });
-        }
+        }*/
     }
 }

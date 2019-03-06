@@ -32,8 +32,8 @@ namespace Aufgabe1_API
         public double Dot(Vector other) => x * other.x + y * other.y;
         public static double Dot(Vector vec, Vector other) => vec.x * other.x + vec.y * other.y;
 
-        //public Vector Cross(Vector other) => x * other.y - y * other.x;
-        public static Vector Cross(Vector vec, Vector other) => new Vector(vec.y-other.y, -(vec.x-other.x));
+        public double Cross(Vector other) => x * other.y - y * other.x;
+        public static double Cross(Vector vec, Vector other) => vec.x * other.y - vec.y * other.x;
 
         public Vector Normalize() => this/Magnitude();
         public static Vector Normalize(Vector vec) => vec / vec.Magnitude();

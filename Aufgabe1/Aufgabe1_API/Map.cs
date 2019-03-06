@@ -11,7 +11,7 @@ namespace Aufgabe1_API
         public Polygon[] polygons;
         public Vector[] busPath;
         public Vector startingPosition;
-        private List<PolygonVertex> allDots;
+        public List<PolygonVertex> allDots;
         public double busSpeed, characterSpeed, busApproachConstant;
 
         public Map(string[] lines)
@@ -41,6 +41,7 @@ namespace Aufgabe1_API
             allDots = new List<PolygonVertex>();
             foreach (Polygon polygon in polygons)
             {
+                polygon.FixDirection();
                 for (int i = 0; i < polygon.Length; i++) allDots.Add(polygon[i]);
             }
         }
@@ -56,8 +57,14 @@ namespace Aufgabe1_API
             allDots = new List<PolygonVertex>();
             foreach (Polygon polygon in polygons)
             {
+                polygon.FixDirection();
                 for (int i = 0; i < polygon.Length; i++) allDots.Add(polygon[i]);
             }
+        }
+
+        public void FixPolygons()
+        {
+            foreach (Polygon polygon in polygons) polygon.FixDirection();
         }
 
         public Dictionary<Vector, double> GenerateVisibilityGraph(Vector origin)
@@ -96,9 +103,11 @@ namespace Aufgabe1_API
                 {
                     PolygonVertex left = polygonVertex.polygon[polygonVertex.index - 1];
                     PolygonVertex right = polygonVertex.polygon[polygonVertex.index + 1];
-
+                    
                     double dist = origin.Distance(polygonVertex.vector);
-                    if (intersections.All(x => x == polygonVertex || x.polygon[x.index + 1] == polygonVertex || DistanceToLineAtAngle(origin, currentAngle, x) >= dist))
+                    if (intersections.All(x => x == polygonVertex 
+                     || x.polygon[x.index + 1] == polygonVertex 
+                     || DistanceToLineAtAngle(origin, currentAngle, x) >= dist))
                         visibilityGraph.Add(polygonVertex.vector);
                 }
 
@@ -107,10 +116,10 @@ namespace Aufgabe1_API
                     PolygonVertex left = polygonVertex.polygon[polygonVertex.index - 1];
                     PolygonVertex right = polygonVertex.polygon[polygonVertex.index + 1];
 
-                    if (AngleHelper.GetSide(angles[left], currentAngle) < 0) intersections.RemoveAll(x => x == left);
+                    if (left.vector == origin|| AngleHelper.GetSide(angles[left], currentAngle) < 0) intersections.Remove(left);
                     else if (!intersections.Contains(left)) intersections.Add(left);
 
-                    if (AngleHelper.GetSide(angles[right], currentAngle) < 0) intersections.RemoveAll(x => x == polygonVertex);
+                    if (right.vector == origin || AngleHelper.GetSide(angles[right], currentAngle) < 0) intersections.Remove( polygonVertex);
                     else if (!intersections.Contains(polygonVertex)) intersections.Add(polygonVertex);
                 }
             }
@@ -120,6 +129,11 @@ namespace Aufgabe1_API
             foreach (Vector endpoint in GetEndpoints(origin)) if (PossiblePath(origin, endpoint)) visibilityGraph.Add(endpoint);
 
             return visibilityGraph.Distinct().ToDictionary(x => x, x => x.Distance(origin));
+        }
+
+        public Dictionary<Vector, Dictionary<Vector, double>> GenerateNavmap()
+        {
+            return allDots.ToDictionary(x => x.vector, x => GenerateVisibilityGraph(x.vector));
         }
 
         public double DistanceToLineAtAngle(Vector origin, double angle, PolygonVertex segment)
