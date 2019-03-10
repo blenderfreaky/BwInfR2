@@ -133,7 +133,7 @@ namespace Aufgabe1_API
 
         public Dictionary<Vector, Dictionary<Vector, double>> GenerateNavmap()
         {
-            return allDots.ToDictionary(x => x.vector, x => GenerateVisibilityGraph(x.vector));
+            return allDots.ToDictionary(x => x.vector, x => GenerateVisibilityGraph(x.vector + x.polygon[x.index+1]));
         }
 
         public double DistanceToLineAtAngle(Vector origin, double angle, PolygonVertex segment)

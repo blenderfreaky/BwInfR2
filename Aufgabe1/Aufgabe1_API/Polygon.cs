@@ -38,9 +38,9 @@ namespace Aufgabe1_API
                 }
             }
 
-            Vector left = max.polygon.vertices[max.index - 1].vector;
+            Vector left = max.polygon[max.index - 1].vector;
             Vector center = max.vector;
-            Vector right = max.polygon.vertices[max.index + 1].vector;
+            Vector right = max.polygon[max.index + 1].vector;
 
             int direction = Math.Sign(
                 (center.x * right.y + left.x * center.y + left.y * right.x)

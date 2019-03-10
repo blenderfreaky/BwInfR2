@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.271
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aufgabe1_GUI", "Aufgabe1\Aufgabe1_GUI.csproj", "{AC9DB9E7-EA05-4D19-BE52-A2E93F556EC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aufgabe1_GUI", "Aufgabe1_GUI\Aufgabe1_GUI.csproj", "{AC9DB9E7-EA05-4D19-BE52-A2E93F556EC7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aufgabe1_API", "Aufgabe1_API\Aufgabe1_API.csproj", "{9D02B5F8-A4CB-4200-B4C7-44717C5B01F4}"
 EndProject

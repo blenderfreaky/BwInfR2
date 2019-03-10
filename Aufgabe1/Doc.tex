@@ -1,0 +1,41 @@
+\documentclass[12pt]{article}
+
+\usepackage[a4paper,margin=2.5cm,footskip=0.7cm,headheight=1cm]{geometry}
+
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{scalerel,amssymb}
+
+\newcommand{\overtext}[2]{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily #2}}}{#1}}}
+\newcommand{\comment}[1]{}
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
+\DeclarePairedDelimiter\brackets{(}{)}
+
+%TODO
+\title{\vspace{-2.0cm}Aufgabe 1}
+\author{Nikolas Kilian}
+\date{8. März 2019}
+
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+\pagestyle{fancy} 
+
+\makeatletter
+\let\runauthor\@author
+\makeatother
+\lhead{\runauthor}
+\cfoot{\thepage\ of \pageref{LastPage}}
+
+\begin{document}
+\maketitle
+
+\section{Lösungsidee}
+\subsection{Reduktion der Möglichkeiten}
+\begin{itemize}
+\item Alle nicht geraden Wege sind suboptimal\\
+\item Alle Wege die nicht direkt an Polygonecken oder den Buspfad gehen sind suboptimal\\
+\item Der ununterbrochene Weg zum Buspfad muss im 30$\deg$ Winkel sein\\
+\end{itemize}
+Um die Nummer der Möglichkeiten zu reduzieren sucht man von allen Eckpunkten alle anderen erreichbaren Eckpunkte.
+
+\end{document}
