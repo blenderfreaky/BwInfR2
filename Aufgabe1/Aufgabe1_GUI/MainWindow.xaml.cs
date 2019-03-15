@@ -77,14 +77,10 @@ namespace Aufgabe1
                 });
         }
 
-        private void Navmap_Loaded(object sender, RoutedEventArgs e) => DrawNavmap();
-        private void Navmap_Move(object sender, RoutedEventArgs e) => DrawNavmap();
+        private void Navmap_Loaded(object sender, RoutedEventArgs e) => DrawVisibilityGraph();
+        private void Navmap_Move(object sender, RoutedEventArgs e) => DrawVisibilityGraph();
         private void DrawNavmap()
         {
-            Point mousePositionPoint = Mouse.GetPosition(Navmap);
-            Vector mousePosition = new Vector(mousePositionPoint.X, mousePositionPoint.Y);
-            //Vector mousePosition = new Vector(148, 141);
-
             Navmap.Children.Clear();
             foreach (var origin in map.GenerateNavmap())
                 foreach (var target in origin.Value)
@@ -103,8 +99,8 @@ namespace Aufgabe1
                     X2 = target.Key.x,
                     Y2 = target.Key.y,
                 });
-        }/*
-        private void DrawNavmap()
+        }
+        private void DrawVisibilityGraph()
         {
             Point mousePositionPoint = Mouse.GetPosition(Navmap);
             Vector mousePosition = new Vector(mousePositionPoint.X, mousePositionPoint.Y);
@@ -127,6 +123,6 @@ namespace Aufgabe1
                     X2 = mousePosition.x,
                     Y2 = mousePosition.y,
                 });
-        }*/
+        }
     }
 }

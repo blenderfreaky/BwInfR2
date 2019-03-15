@@ -12,6 +12,7 @@ namespace Aufgabe1_API
         {
             this.vertices = new PolygonVertex[vertices.Length];
             for (int i = 0; i < vertices.Length; i++) this.vertices[i] = new PolygonVertex { vector = vertices[i], polygon = this, index = i };
+            Flip();
         }
 
         public int Length => vertices.Length;
@@ -38,15 +39,15 @@ namespace Aufgabe1_API
                 }
             }
 
-            Vector left = max.polygon[max.index - 1].vector;
+            Vector left = max.Left.vector;
             Vector center = max.vector;
-            Vector right = max.polygon[max.index + 1].vector;
+            Vector right = max.Right.vector;
 
-            int direction = Math.Sign(
+            double direction = 
                 (center.x * right.y + left.x * center.y + left.y * right.x)
-              - (left.y * center.x + center.y * right.x + left.x * right.y));
+              - (left.y * center.x + center.y * right.x + left.x * right.y);
 
-            if (direction == -1) Flip();
+            if (direction < 0) Flip();
         }
 
         public void Flip()
@@ -60,6 +61,9 @@ namespace Aufgabe1_API
         public Vector vector;
         public Polygon polygon;
         public int index;
+
+        public PolygonVertex Left  => polygon[index - 1];
+        public PolygonVertex Right => polygon[index + 1];
 
         public static bool operator ==(PolygonVertex a, PolygonVertex b) => a.polygon == b.polygon && a.index == b.index;
         public static bool operator !=(PolygonVertex a, PolygonVertex b) => a.polygon != b.polygon || a.index != b.index;

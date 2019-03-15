@@ -30,12 +30,6 @@
 \maketitle
 
 \section{Lösungsidee}
-\subsection{Reduktion der Möglichkeiten}
-\begin{itemize}
-\item Alle nicht geraden Wege sind suboptimal\\
-\item Alle Wege die nicht direkt an Polygonecken oder den Buspfad gehen sind suboptimal\\
-\item Der ununterbrochene Weg zum Buspfad muss im 30$\deg$ Winkel sein\\
-\end{itemize}
-Um die Nummer der Möglichkeiten zu reduzieren sucht man von allen Eckpunkten alle anderen erreichbaren Eckpunkte. 
+Um den optimalen Weg zu finden errechne man zuerst alle vom Startpunkt erreichbaren Eckpunkte der Polygone, und schaut ob der direkte Weg zum Buspfad* offen ist. 
 
 \end{document}

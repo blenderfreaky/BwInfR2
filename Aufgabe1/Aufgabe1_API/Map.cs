@@ -41,7 +41,7 @@ namespace Aufgabe1_API
             allDots = new List<PolygonVertex>();
             foreach (Polygon polygon in polygons)
             {
-                polygon.FixDirection();
+                //polygon.FixDirection();
                 for (int i = 0; i < polygon.Length; i++) allDots.Add(polygon[i]);
             }
         }
@@ -57,7 +57,7 @@ namespace Aufgabe1_API
             allDots = new List<PolygonVertex>();
             foreach (Polygon polygon in polygons)
             {
-                polygon.FixDirection();
+                //polygon.FixDirection();
                 for (int i = 0; i < polygon.Length; i++) allDots.Add(polygon[i]);
             }
         }
@@ -78,13 +78,16 @@ namespace Aufgabe1_API
             foreach (PolygonVertex polygonVertex in allDots)
             {
                 Vector a = polygonVertex.vector - origin;
-                Vector b = polygonVertex.polygon[polygonVertex.index + 1].vector - origin;
+                Vector b = polygonVertex.Right.vector - origin;
 
-                if ((a.x > 0 || b.x > 0) && a.y * b.y <= 0 &&
-                    (a.y == b.y ?
-                    a.y == 0
-                  : (a.x >= a.y * (b.x - a.x) / (b.y - a.y)))) intersections.Add(polygonVertex);
+                if (a.y * b.y <= 0 && (a.x > 0 || b.x > 0) 
+                 && (a.y == b.y ?
+                        a.y == 0
+                      : (a.x >= a.y * (b.x - a.x) / (b.y - a.y))))
+                    intersections.Add(polygonVertex);
             }
+
+            return intersections.SelectMany(x => new[] { x.vector, x.Right.vector }).Distinct().ToDictionary(x => x, x => 0d);
 
             IEnumerable<(double, IEnumerable<PolygonVertex>)> allDotsByAngles =
                 angles
@@ -99,32 +102,37 @@ namespace Aufgabe1_API
 
             foreach ((double currentAngle, IEnumerable<PolygonVertex> vertices) in allDotsByAngles)
             {
+                List<PolygonVertex> delta = new List<PolygonVertex>();
+
                 foreach (PolygonVertex polygonVertex in vertices)
                 {
-                    PolygonVertex left = polygonVertex.polygon[polygonVertex.index - 1];
-                    PolygonVertex right = polygonVertex.polygon[polygonVertex.index + 1];
+                    PolygonVertex left = polygonVertex.Left;
+
+                    //if (left.vector == origin || AngleHelper.GetSide(angles[left], currentAngle) < 0) intersections.Remove(left);
+                    if (left.vector == origin || intersections.Contains(left)) intersections.Remove(left);
+                    else delta.Add(left);
+
+                    //if (right.vector == origin || AngleHelper.GetSide(angles[right], currentAngle) < 0) intersections.Remove(polygonVertex);
+                    if (polygonVertex.Right.vector == origin || intersections.Contains(polygonVertex)) intersections.Remove(polygonVertex);
+                    else delta.Add(polygonVertex);
+                }
+
+                foreach (PolygonVertex polygonVertex in vertices)
+                {
+                    PolygonVertex left = polygonVertex.Left;
+                    PolygonVertex right = polygonVertex.Right;
                     
                     double dist = origin.Distance(polygonVertex.vector);
                     if (intersections.All(x => x == polygonVertex 
-                     || x.polygon[x.index + 1] == polygonVertex 
-                     || DistanceToLineAtAngle(origin, currentAngle, x) >= dist))
+                                            || x.Right == polygonVertex 
+                                            || DistanceToLineAtAngle(origin, currentAngle, x) >= dist))
                         visibilityGraph.Add(polygonVertex.vector);
                 }
 
-                foreach (PolygonVertex polygonVertex in vertices)
-                {
-                    PolygonVertex left = polygonVertex.polygon[polygonVertex.index - 1];
-                    PolygonVertex right = polygonVertex.polygon[polygonVertex.index + 1];
-
-                    if (left.vector == origin|| AngleHelper.GetSide(angles[left], currentAngle) < 0) intersections.Remove(left);
-                    else if (!intersections.Contains(left)) intersections.Add(left);
-
-                    if (right.vector == origin || AngleHelper.GetSide(angles[right], currentAngle) < 0) intersections.Remove( polygonVertex);
-                    else if (!intersections.Contains(polygonVertex)) intersections.Add(polygonVertex);
-                }
+                intersections.AddRange(delta);
             }
 
-            if (PossiblePath(origin, startingPosition)) visibilityGraph.Add(startingPosition);
+            //if (PossiblePath(origin, startingPosition)) visibilityGraph.Add(startingPosition);
 
             foreach (Vector endpoint in GetEndpoints(origin)) if (PossiblePath(origin, endpoint)) visibilityGraph.Add(endpoint);
 
@@ -133,7 +141,12 @@ namespace Aufgabe1_API
 
         public Dictionary<Vector, Dictionary<Vector, double>> GenerateNavmap()
         {
-            return allDots.ToDictionary(x => x.vector, x => GenerateVisibilityGraph(x.vector + x.polygon[x.index+1]));
+            return allDots.Select(x => x.vector).Concat(new[] { startingPosition }).ToDictionary(x => x, x => GenerateVisibilityGraph(x));
+
+            /*double distance = 5;
+            Vector Turn(Vector vec) => new Vector(vec.y, -vec.x);
+            Vector Extend(PolygonVertex x) => x.vector + Turn((x.Right.vector - x.vector).Normalize() - (x.Left.vector - x.vector).Normalize()) * distance;
+            return allDots.Select(x => Extend(x)).Union(new[] { startingPosition }).ToDictionary(x => x, x => GenerateVisibilityGraph(x));*/
         }
 
         public double DistanceToLineAtAngle(Vector origin, double angle, PolygonVertex segment)
@@ -147,13 +160,6 @@ namespace Aufgabe1_API
         public Vector PointToLineAtAngle(Vector origin, double angle, PolygonVertex segment)
         {
             return new Vector(Math.Cos(angle), Math.Sin(angle)) * DistanceToLineAtAngle(origin, angle, segment);
-        }
-
-        private static void AddSorted<T>(List<T> list, T elem, Comparer<T> comp)
-        {
-            int i = -1;
-            while (++i < list.Count && comp.Compare(list[i], elem) == -1) ;
-            list.Insert(i, elem);
         }
 
         public bool PossiblePath(Vector a, Vector b)
@@ -174,7 +180,7 @@ namespace Aufgabe1_API
 
                 double dotProduct = Vector.Dot(pathToBus, busPathNormal);
                 double distance = dotProduct / busPathNormal.MagnitudeSquared();
-                distance += (busPath[i] + busPathNormal * distance).Magnitude() * busApproachConstant / busPathNormal.Magnitude();
+                distance += (dot - (busPath[i] + busPathNormal * distance)).Magnitude() * busApproachConstant / busPathNormal.Magnitude();
 
                 yield return busPath[i] + busPathNormal * (distance < 0 ? 0 : distance > 1 ? 1 : distance);
             }

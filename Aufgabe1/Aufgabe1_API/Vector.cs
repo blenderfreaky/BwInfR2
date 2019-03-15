@@ -35,8 +35,8 @@ namespace Aufgabe1_API
         public double Cross(Vector other) => x * other.y - y * other.x;
         public static double Cross(Vector vec, Vector other) => vec.x * other.y - vec.y * other.x;
 
-        public Vector Normalize() => this/Magnitude();
-        public static Vector Normalize(Vector vec) => vec / vec.Magnitude();
+        public Vector Normalize() => x == 0 && y == 0 ? this : this / Magnitude();
+        public static Vector Normalize(Vector vec) => vec.x == 0 && vec.y == 0 ? vec : vec / vec.Magnitude();
 
         public static Vector operator +(Vector a, Vector b) => new Vector(a.x + b.x, a.y + b.y);
         public static Vector operator -(Vector vec) => new Vector(-vec.x, -vec.y);
