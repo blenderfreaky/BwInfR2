@@ -32,7 +32,7 @@ namespace Aufgabe1
             string root = "../../../../Examples/Aufgabe1/";
             map = new Map(File.ReadAllLines(root + "lisarennt3.txt"));
             
-            /**/
+            /**
             map = new Map(new Polygon[] 
                 {
                     new Polygon(new Vector[] {new Vector(50, 50), new Vector(50, 100), new Vector(100, 100), new Vector(100, 50), }),

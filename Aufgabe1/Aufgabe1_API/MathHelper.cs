@@ -20,5 +20,6 @@ namespace Aufgabe1_API
         //TODO: This should be somewhere else
         public static void RemoveSimilar<T1, T2>(this SortedSet<T1> set, T2 t2) => set.RemoveWhere(x => x.Equals(t2));
         public static bool ContainsSimilar<T1, T2>(this SortedSet<T1> set, T2 t2) => set.Any(x => x.Equals(t2));
+        public static void Deconstruct<T1, T2>(this KeyValuePair<T1, T2> keyValuePair, out T1 key, out T2 value) { key = keyValuePair.Key; value = keyValuePair.Value; }
     }
 }
