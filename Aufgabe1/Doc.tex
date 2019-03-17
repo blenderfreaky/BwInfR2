@@ -5,6 +5,7 @@
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{scalerel,amssymb}
+\usepackage{gensymb}
 
 \newcommand{\overtext}[2]{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily #2}}}{#1}}}
 \newcommand{\comment}[1]{}
@@ -30,6 +31,13 @@
 \maketitle
 
 \section{Lösungsidee}
-Um den optimalen Weg zu finden errechne man zuerst alle vom Startpunkt erreichbaren Eckpunkte der Polygone, und schaut ob der direkte Weg zum Buspfad* offen ist. 
+Wenn es keine Hindernisse gibt so ist der optimale Weg eine gerade Strecke vom Startpunkt zum Buspfad im 30\degree Winkel.
+Gibt es Hindernisse, so ist der optimale Weg der optimale Weg zu einem Eckpunkt von dem die 30\degree Strecke offen ist, und dann diese 0\degree Strecke.
+Um das Optimum mit Hindernissen zu finden muss man also alle Eckpunkte bestimmen, von denen aus diese 30\degree Strecke offen ist, und den optimalen Weg zu ihnen bestimmen. Unter den resultierenden Wegen ist das Optimum enthalten, also muss man nun nur noch die Zeit zu der Lisa loslaufen muss für alle Wege errechnen und den mit der spätesten auswählen.
+Der optimale Weg zu diesen Eckpunkten lässt sich bestimmen mithilfe eines Sichtbarkeitsgraphen und Dijkstra's Algorithmus.
+
+\section{Umsetzung}
+Zur Umsetzung habe ich mich für eine Implementation in C\# entschieden, mit einer Visualisierung mithilfe von WPF.
+
 
 \end{document}

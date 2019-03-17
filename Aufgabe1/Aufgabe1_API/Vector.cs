@@ -21,19 +21,27 @@ namespace Aufgabe1_API
             this.y = y;
         }
 
-        public double Angle() => AngleHelper.ClampAngle(Math.Atan2(y, x));
-        public double Angle(Vector origin) => AngleHelper.ClampAngle(Math.Atan2(y-origin.y, x-origin.x));
+        public double Angle() => MathHelper.ModuloAngle(Math.Atan2(y, x));
+        public double Angle(Vector origin) => MathHelper.ModuloAngle(Math.Atan2(y-origin.y, x-origin.x));
 
-        public double Distance(Vector other) => Math.Sqrt(Math.Pow(x - other.x, 2) + Math.Pow(y - other.y, 2));
-        
+        public double DistanceSquared(Vector other) => Math.Pow(x - other.x, 2) + Math.Pow(y - other.y, 2);
+        public double Distance(Vector other) => Math.Sqrt(DistanceSquared(other));
+        public static double DistanceSquared(Vector vec, Vector other) => Math.Pow(vec.x - other.x, 2) + Math.Pow(vec.y - other.y, 2);
+        public static double Distance(Vector vec, Vector other) => Math.Sqrt(vec.DistanceSquared(other));
+
         public double MagnitudeSquared() => Math.Pow(x, 2) + Math.Pow(y, 2);
         public double Magnitude() => Math.Sqrt(MagnitudeSquared());
+        public static double MagnitudeSquared(Vector vec) => Math.Pow(vec.x, 2) + Math.Pow(vec.y, 2);
+        public static double Magnitude(Vector vec) => Math.Sqrt(vec.MagnitudeSquared());
 
         public double Dot(Vector other) => x * other.x + y * other.y;
         public static double Dot(Vector vec, Vector other) => vec.x * other.x + vec.y * other.y;
 
-        public double Cross(Vector other) => x * other.y - y * other.x;
-        public static double Cross(Vector vec, Vector other) => vec.x * other.y - vec.y * other.x;
+        public double Determinant(Vector other) => x * other.y - y * other.x;
+        public static double Determinant(Vector vec, Vector other) => vec.x * other.y - vec.y * other.x;
+
+        public double AngleTo(Vector other) => MathHelper.ModuloAngle(-Math.Atan2(Determinant(other), Dot(other)));
+        public static double AngleTo(Vector vec, Vector other) => MathHelper.ModuloAngle(-Math.Atan2(Determinant(vec, other), Dot(vec, other)));
 
         public Vector Normalize() => x == 0 && y == 0 ? this : this / Magnitude();
         public static Vector Normalize(Vector vec) => vec.x == 0 && vec.y == 0 ? vec : vec / vec.Magnitude();
@@ -43,6 +51,7 @@ namespace Aufgabe1_API
         public static Vector operator -(Vector a, Vector b) => new Vector(a.x - b.x, a.y - b.y);
         public static Vector operator *(Vector a, Vector b) => new Vector(a.x * b.x, a.y * b.y);
         public static Vector operator *(Vector a, double b) => new Vector(a.x * b, a.y * b);
+        public static Vector operator *(double b, Vector a) => new Vector(a.x * b, a.y * b);
         public static Vector operator /(Vector a, Vector b) => new Vector(a.x / b.x, a.y / b.y);
         public static Vector operator /(Vector a, double b) => new Vector(a.x / b, a.y / b);
 
@@ -75,10 +84,6 @@ namespace Aufgabe1_API
 
             return (sAsBeB != eAsBeB && sAeAsB != sAeAeB)
                   && !(sAeAeB == VectorOrder.Colinear || eAsBeB == VectorOrder.Colinear || sAeAsB == VectorOrder.Colinear || sAeAeB == VectorOrder.Colinear);
-            //    || sAsBeB == VectorOrder.Colinear 
-            //    || eAsBeB == VectorOrder.Colinear 
-            //    || sAeAsB == VectorOrder.Colinear
-            //    || sAeAeB == VectorOrder.Colinear;
         }
         #endregion
 

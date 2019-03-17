@@ -6,17 +6,16 @@ namespace Aufgabe1_API
 {
     public class Polygon
     {
-        public PolygonVertex[] vertices;
+        public Vertex[] vertices;
 
         public Polygon(Vector[] vertices)
         {
-            this.vertices = new PolygonVertex[vertices.Length];
-            for (int i = 0; i < vertices.Length; i++) this.vertices[i] = new PolygonVertex { vector = vertices[i], polygon = this, index = i };
-            Flip();
+            this.vertices = new Vertex[vertices.Length];
+            for (int i = 0; i < vertices.Length; i++) this.vertices[i] = new Vertex(vertices[i], this, i);
         }
 
         public int Length => vertices.Length;
-        public PolygonVertex this[int index] => index < 0 ? this[index + Length] : vertices[index % Length];
+        public Vertex this[int index] => index < 0 ? this[index + Length] : vertices[index % Length];
         public int this[Vector vec]
         {
             get
@@ -26,11 +25,17 @@ namespace Aufgabe1_API
             }
         }
 
+        public bool Intersects(Vector a, Vector b)
+        {
+            for (int i = 0; i < Length; i++) if (Vector.IntersectingLines(a, b, this[i].vector, this[i + 1].vector)) return true;
+            return false;
+        }
+
         public void FixDirection()
         {
-            PolygonVertex max = vertices[0];
+            Vertex max = vertices[0];
 
-            foreach (PolygonVertex polygonVertex in vertices)
+            foreach (Vertex polygonVertex in vertices)
             {
                 if (max.vector.y > polygonVertex.vector.y
                  && max.vector.x <= polygonVertex.vector.x)
@@ -39,9 +44,9 @@ namespace Aufgabe1_API
                 }
             }
 
-            Vector left = max.Left.vector;
+            Vector left = max.Previous.vector;
             Vector center = max.vector;
-            Vector right = max.Right.vector;
+            Vector right = max.Next.vector;
 
             double direction = 
                 (center.x * right.y + left.x * center.y + left.y * right.x)
@@ -50,24 +55,48 @@ namespace Aufgabe1_API
             if (direction < 0) Flip();
         }
 
-        public void Flip()
-        {
-            vertices = vertices.Reverse().ToArray();
-        }
+        public void Flip() => vertices = vertices.Reverse().Select(x => new Vertex(x.vector, this, vertices.Length - x.index - 1)).ToArray();
     }
 
-    public struct PolygonVertex
+    public struct Vertex
     {
-        public Vector vector;
-        public Polygon polygon;
-        public int index;
+        public readonly Vector vector;
+        public readonly Polygon polygon;
+        public readonly int index;
 
-        public PolygonVertex Left  => polygon[index - 1];
-        public PolygonVertex Right => polygon[index + 1];
+        public Vertex(Vector vector, Polygon polygon, int index)
+        {
+            this.vector = vector;
+            this.polygon = polygon;
+            this.index = index;
+        }
 
-        public static bool operator ==(PolygonVertex a, PolygonVertex b) => a.polygon == b.polygon && a.index == b.index;
-        public static bool operator !=(PolygonVertex a, PolygonVertex b) => a.polygon != b.polygon || a.index != b.index;
-        public override bool Equals(object obj) => obj is PolygonVertex segment && polygon == segment.polygon && index == segment.index;
+        public Vertex Previous => polygon[index - 1];
+        public Vertex Next => polygon[index + 1];
+
+        // Assumes polygon to be properly oriented, i.e. FixDirection() has been executed
+        public bool IsConvex => Vector.AngleTo(Next.vector - vector, vector - Previous.vector) < Math.PI;
+
+        public Vector Normal => IsConvex
+                              ? (Previous.vector - vector).Normalize() + (Next.vector - vector).Normalize() 
+                              : -((Previous.vector - vector).Normalize() + (Next.vector - vector).Normalize());
+
+        public bool IsNeighbor(Vertex other) => Previous == other || Next == other;
+
+        public bool BehindNeighbors(Vector other)
+        {
+            bool enclosed = Vector.Orientation(vector, Previous.vector, other) == Vector.VectorOrder.Counterclockwise
+                          ^ Vector.Orientation(vector, Next.vector, other) == Vector.VectorOrder.Counterclockwise;
+            double dot = Vector.Dot(other - vector, Normal);
+
+            return IsConvex
+                 ?  enclosed && dot < 0
+                 : !enclosed && dot <= 0;
+        }
+
+        public static bool operator ==(Vertex a, Vertex b) => a.polygon == b.polygon && a.index == b.index;
+        public static bool operator !=(Vertex a, Vertex b) => a.polygon != b.polygon || a.index != b.index;
+        public override bool Equals(object obj) => obj is Vertex segment && polygon == segment.polygon && index == segment.index;
         public override int GetHashCode()
         {
             var hashCode = 1956617662;
