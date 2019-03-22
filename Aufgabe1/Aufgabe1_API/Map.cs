@@ -72,9 +72,9 @@ namespace Aufgabe1_API
         {
             public Vertex first, second;
             public Vector origin;
-            public double distance, angle;
+            public double angle;
 
-            public SortableEdge(Vertex first, Vector origin)
+            /*public SortableEdge(Vertex first, Vector origin)
             {
                 this.origin = origin;
                 this.first = first;
@@ -91,17 +91,14 @@ namespace Aufgabe1_API
 
                     distance = (first.vector + factor * (second.vector - first.vector)).DistanceSquared(origin);
                 }
-            }
+            }*/
 
-            /*public SortableEdge(Vertex first, Vector origin, double angle)
+            public SortableEdge(Vertex first, Vector origin, double angle = 0)
             {
                 this.origin = origin;
                 this.first = first;
                 second = first.Next;
                 this.angle = angle;
-
-                distance = 0;
-                distance = CalculateDistance(angle);
             }
             
             public double CalculateDistance(double angle)
@@ -109,10 +106,10 @@ namespace Aufgabe1_API
                 Vector a = first.vector - origin;
                 Vector b = second.vector - origin;
                 return ((a.y - b.y) * b.x - (a.x - b.x) * b.y) / (Math.Cos(angle) * (a.y - b.y) - Math.Sin(angle) * (a.x - b.x));
-            }*/
-
-            //public int CompareTo(SortableEdge other) => CalculateDistance(Math.Max(angle, other.angle)).CompareTo(other.CalculateDistance(Math.Max(angle, other.angle)));
-            public int CompareTo(SortableEdge other) => angle == other.angle ? distance.CompareTo(other.distance) : angle.CompareTo(other.angle);
+            }
+            
+            public int CompareTo(SortableEdge other) => CalculateDistance(angle = Math.Max(angle, other.angle)).CompareTo(other.CalculateDistance(angle));
+            //public int CompareTo(SortableEdge other) => angle == other.angle ? distance.CompareTo(other.distance) : angle.CompareTo(other.angle);
             public override bool Equals(object obj) => 
                 obj is SortableEdge edge ? edge.first == first
               : obj is Vertex vertex ? vertex == first
@@ -124,7 +121,6 @@ namespace Aufgabe1_API
                 var hashCode = 893733272;
                 hashCode = hashCode * -1521134295 + EqualityComparer<Vertex>.Default.GetHashCode(first);
                 hashCode = hashCode * -1521134295 + EqualityComparer<Vertex>.Default.GetHashCode(second);
-                hashCode = hashCode * -1521134295 + distance.GetHashCode();
                 return hashCode;
             }
 
@@ -198,14 +194,17 @@ namespace Aufgabe1_API
                 {
                     if (target.IsNeighbor(originVert)) return true;
                     if (target.BehindNeighbors(origin)) return false; 
-                    if (!(target.polygon is null) && originVert.BehindNeighbors(target.vector)) return false; 
+                    if (!(originVert.polygon is null) && originVert.BehindNeighbors(target.vector)) return false; 
                     if (target.polygon.Intersects(origin, target.vector)) return false;
                 }
-                if (currentAngle == previousAngle)
+                //if (currentAngle == previousAngle)
                 //if (!(target.polygon is null) && target.BehindNeighbors(origin.vector)) return false;
 
-                SortableEdge? min = intersections.Count == 0 ? (SortableEdge?)null : intersections.Min;
-                if (min.HasValue && Vector.IntersectingLines(min.Value.first.vector, min.Value.second.vector, origin, target.vector)) return false;
+                if (intersections.Count != 0) {
+                    SortableEdge min = intersections.Min;
+                    //if (Vector.IntersectingLines(min.first.vector, min.second.vector, origin, target.vector)) return false;
+                    if (min.CalculateDistance(currentAngle) < origin.Distance(target.vector)) return false;
+                }
 
                 return true;
             }
@@ -214,17 +213,16 @@ namespace Aufgabe1_API
             {
                 if (IsVisible(vert, currentAngle)) visibilityGraph.Add(vert.vector);
 
-
                 if (vert.polygon is null) continue;
 
                 Vertex previous = vert.Previous;
                 if (previous.vector == origin || MathHelper.GetAngleSide(angles[previous], currentAngle) < 0) intersections.RemoveSimilar(previous);
                 //if (previous.vector == origin || intersections.ContainsSimilar(previous)) intersections.RemoveSimilar(previous);
-                else intersections.Add(new SortableEdge(previous, origin));
+                else intersections.Add(new SortableEdge(previous, origin, currentAngle));
 
                 if (vert.vector == origin || MathHelper.GetAngleSide(angles[vert], currentAngle) < 0) intersections.RemoveSimilar(vert);
                 //if (polygonVertex.Next.vector == origin || intersections.ContainsSimilar(polygonVertex)) intersections.RemoveSimilar(polygonVertex);
-                else intersections.Add(new SortableEdge(vert, origin));
+                else intersections.Add(new SortableEdge(vert, origin, currentAngle));
 
                 previousAngle = currentAngle;
             }
