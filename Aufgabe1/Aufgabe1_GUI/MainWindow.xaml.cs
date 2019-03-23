@@ -44,6 +44,10 @@ namespace Aufgabe1
             /**/
 
             InitializeComponent();
+
+            double off = 1000;
+            Off.Margin = new Thickness(-off);
+            Back.Margin = new Thickness(off, off + map.allDots.Average(x => x.vector.y)*2, off, off);
         }
 
         private void Polygons_Loaded(object sender, RoutedEventArgs e)
@@ -51,15 +55,15 @@ namespace Aufgabe1
             foreach (var polygon in map.polygons)
                 Polygons.Children.Add(
                     new System.Windows.Shapes.Polygon
-                    {
-                        Stroke = Brushes.Black,
-                        Fill = Brushes.Transparent,
-                        StrokeThickness = 2,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        HorizontalAlignment = HorizontalAlignment.Center,
+                        {
+                            Stroke = Brushes.Transparent,
+                            Fill = Brushes.Gray,
+                            StrokeThickness = 2,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            HorizontalAlignment = HorizontalAlignment.Center,
 
-                        Points = new PointCollection(polygon.vertices.Select(x => new Point(x.vector.x, x.vector.y))),
-                    });
+                            Points = new PointCollection(polygon.vertices.Select(x => new Point(x.vector.x, -x.vector.y))),
+                        });
         }
 
         private void Buspath_Loaded(object sender, RoutedEventArgs e)
@@ -73,56 +77,108 @@ namespace Aufgabe1
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center,
 
-                    Points = new PointCollection(map.busPath.Select(x => new Point(x.x, x.y))),
+                    Points = new PointCollection(map.busPath.Select(x => new Point(x.x, -x.y))),
                 });
         }
 
-        private void Navmap_Loaded(object sender, RoutedEventArgs e) => DrawVisibilityGraph();
-        private void Navmap_Move(object sender, RoutedEventArgs e) => DrawVisibilityGraph();
+        private void Navmap_Loaded(object sender, RoutedEventArgs e) => DrawNavmap();
+        private void Navmap_Move(object sender, RoutedEventArgs e) => DrawNavmap();
         private void DrawNavmap()
         {
             Navmap.Children.Clear();
-            foreach (var origin in map.GenerateNavmap())
+            Debugging.Children.Clear();
+
+            List<(Vector, Vector)> debug;
+            foreach (var origin in map.GenerateVisibilityGraph(out debug))
+            {
                 foreach (var target in origin.Value)
-                Navmap.Children.Add(
-                new Line
                 {
-                    Stroke = Brushes.Red,
-                    Fill = Brushes.Transparent,
-                    StrokeThickness = 0.2,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Navmap.Children.Add(
+                        new Line
+                        {
+                            Stroke = Brushes.Red,
+                            Fill = Brushes.Transparent,
+                            StrokeThickness = 0.8,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            HorizontalAlignment = HorizontalAlignment.Center,
 
-                    X1 = origin.Key.x,
-                    Y1 = origin.Key.y,
+                            X1 = origin.Key.x,
+                            Y1 = -origin.Key.y,
 
-                    X2 = target.Key.x,
-                    Y2 = target.Key.y,
-                });
+                            X2 = target.Key.x,
+                            Y2 = -target.Key.y,
+                        }
+                    );
+                }
+            }
+            foreach ((Vector a, Vector b) in debug)
+            {
+                Debugging.Children.Add(
+                    new Line
+                    {
+                        Stroke = Brushes.Blue,
+                        Fill = Brushes.Transparent,
+                        StrokeThickness = 1,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+
+                        X1 = a.x,
+                        Y1 = -a.y,
+
+                        X2 = b.x,
+                        Y2 = -b.y,
+                    }
+                );
+            }
         }
         private void DrawVisibilityGraph()
         {
             Point mousePositionPoint = Mouse.GetPosition(Navmap);
-            Vector mousePosition = new Vector(mousePositionPoint.X, mousePositionPoint.Y);
+            Vector mousePosition = new Vector(mousePositionPoint.X, -mousePositionPoint.Y);
             //Vector mousePosition = new Vector(148, 141);
 
             Navmap.Children.Clear();
-            foreach (var origin in map.GenerateVisibilityGraph(mousePosition))
+
+            List<(Vector, Vector)> debug;
+            foreach (var origin in map.GenerateVisibilityPolygon(mousePosition, out debug))
+            {
                 Navmap.Children.Add(
-                new Line
-                {
-                    Stroke = Brushes.Red,
-                    Fill = Brushes.Transparent,
-                    StrokeThickness = 0.2,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Center,
+                    new Line
+                    {
+                        Stroke = Brushes.Red,
+                        Fill = Brushes.Transparent,
+                        StrokeThickness = 0.8,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Center,
 
-                    X1 = origin.Key.x,
-                    Y1 = origin.Key.y,
+                        X1 = origin.Key.x,
+                        Y1 = -origin.Key.y,
 
-                    X2 = mousePosition.x,
-                    Y2 = mousePosition.y,
-                });
+                        X2 = mousePosition.x,
+                        Y2 = -mousePosition.y,
+                    }
+                );
+            }
+
+            foreach ((Vector a, Vector b) in debug)
+            {
+                Debugging.Children.Add(
+                    new Line
+                    {
+                        Stroke = Brushes.Blue,
+                        Fill = Brushes.Transparent,
+                        StrokeThickness = 1,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+
+                        X1 = a.x,
+                        Y1 = -a.y,
+
+                        X2 = b.x,
+                        Y2 = -b.y,
+                    }
+                );
+            }
         }
     }
 }

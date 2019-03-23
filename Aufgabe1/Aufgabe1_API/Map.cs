@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -63,87 +64,29 @@ namespace Aufgabe1_API
             }
         }
 
-        public void FixPolygons()
+        public double CalculateDistance(Vertex vertex, Vector origin, double angle)
         {
-            foreach (Polygon polygon in polygons) polygon.FixDirection();
-        }
-
-        private struct SortableEdge : IComparable<SortableEdge>
-        {
-            public Vertex first, second;
-            public Vector origin;
-            public double angle;
-
-            /*public SortableEdge(Vertex first, Vector origin)
-            {
-                this.origin = origin;
-                this.first = first;
-                second = first.Next;
-                angle = 0;
-
-                double distanceSquared = Vector.DistanceSquared(first.vector, second.vector);
-                if (distanceSquared == 0) distance = origin.Distance(first.vector);
-                else
-                {
-                    double dot = Vector.Dot(origin - first.vector, second.vector - first.vector);
-                    // using 1E-15 instead of double.Epsilon, as double.Epsilon has some very weird behaviour
-                    double factor = MathHelper.Clamp(dot / distanceSquared, 1E-15, 1 - 1E-15);
-
-                    distance = (first.vector + factor * (second.vector - first.vector)).DistanceSquared(origin);
-                }
-            }*/
-
-            public SortableEdge(Vertex first, Vector origin, double angle = 0)
-            {
-                this.origin = origin;
-                this.first = first;
-                second = first.Next;
-                this.angle = angle;
-            }
-            
-            public double CalculateDistance(double angle)
-            {
-                Vector a = first.vector - origin;
-                Vector b = second.vector - origin;
-                return ((a.y - b.y) * b.x - (a.x - b.x) * b.y) / (Math.Cos(angle) * (a.y - b.y) - Math.Sin(angle) * (a.x - b.x));
-            }
-            
-            public int CompareTo(SortableEdge other) => CalculateDistance(angle = Math.Max(angle, other.angle)).CompareTo(other.CalculateDistance(angle));
-            //public int CompareTo(SortableEdge other) => angle == other.angle ? distance.CompareTo(other.distance) : angle.CompareTo(other.angle);
-            public override bool Equals(object obj) => 
-                obj is SortableEdge edge ? edge.first == first
-              : obj is Vertex vertex ? vertex == first
-              : obj is Vector vector ? vector == first.vector
-              : false;
-
-            public override int GetHashCode()
-            {
-                var hashCode = 893733272;
-                hashCode = hashCode * -1521134295 + EqualityComparer<Vertex>.Default.GetHashCode(first);
-                hashCode = hashCode * -1521134295 + EqualityComparer<Vertex>.Default.GetHashCode(second);
-                return hashCode;
-            }
-
-            public static implicit operator Vertex(SortableEdge edge) => edge.first;
-        }
-
-        /*public double DistanceToLineAtAngle(Vector origin, double angle, Vertex first)
-        {
-            Vector a = first.vector - origin;
-            Vector b = first.polygon[first.index + 1].vector - origin;
+            Vector a = vertex.vector - origin;
+            Vector b = vertex.Next.vector - origin;
             return ((a.y - b.y) * b.x - (a.x - b.x) * b.y) / (Math.Cos(angle) * (a.y - b.y) - Math.Sin(angle) * (a.x - b.x));
-        }*/
+        }
 
-        public Dictionary<Vector, double> GenerateVisibilityGraph(Vector origin) => GenerateVisibilityGraph(new Vertex(origin, null, 0));
-        public Dictionary<Vector, double> GenerateVisibilityGraph(Vertex originVert)
+        public Dictionary<Vector, double> GenerateVisibilityPolygon(Vector origin, out List<(Vector, Vector)> debug) => GenerateVisibilityPolygon(new Vertex(origin, null, 0), out debug);
+        public Dictionary<Vector, double> GenerateVisibilityPolygon(Vertex originVert, out List<(Vector, Vector)> debug)
         {
+            List<(Vector, Vector)> debugOut = new List<(Vector, Vector)>();
+
             Vector origin = originVert.vector;
 
-            List<Vector> visibilityGraph = new List<Vector>();
+            List<Vertex> visibilityGraph = new List<Vertex>();
             List<Vertex> allDots = this.allDots.Where(x => x.vector != origin).ToList();
-            
+
+            double angle = 0;
+            double GetAngle() => angle;
+
             // Edges are kept as the vertex with the lower index of the two defining vertices
-            SortedSet<SortableEdge> intersections = new SortedSet<SortableEdge>();
+            SortedSet<Vertex> intersections = new SortedSet<Vertex>(Comparer<Vertex>.Create((a, b) => CalculateDistance(a, origin, GetAngle()).CompareTo(CalculateDistance(b, origin, GetAngle()))));
+            //List<Vertex> intersections = new List<Vertex>();
 
             foreach (Vertex polygonVertex in allDots)
             {
@@ -151,89 +94,101 @@ namespace Aufgabe1_API
                 Vector b = polygonVertex.Next.vector - origin;
 
                 // Intersections with x+ Axis
-                if (a.y * b.y <= 0
+                /*if (a.y * b.y <= 0
                  && (a.x > 0 || b.x > 0)
                  && (a.y == b.y
                    ? a.y == 0
-                   : (a.x >= a.y * (b.x - a.x) / (b.y - a.y))))
+                   : (a.x >= a.y * (b.x - a.x) / (b.y - a.y))))*/
+                if (a.y * b.y <= 0 && CalculateDistance(polygonVertex, origin, 0) >= 0)
                 {
-                    //intersections.Add(new SortableEdge(polygonVertex, (a.x * (b.y - a.y)) / (a.y * (b.x - a.x))));
-                    intersections.Add(new SortableEdge(polygonVertex, origin));
+                    intersections.Add(polygonVertex);
                 }
             }
 
             //return new Dictionary<Vector, double> { { intersections.Count == 0 ? origin : (intersections.Min.first.vector + intersections.Min.second.vector) / 2, 0 } };
-            //return intersections.Select(x => (x.first.vector + x.second.vector)/2).Distinct().ToDictionary(x => x, x => 0d);
+            //return intersections.Select(x => (x.vector + x.Next.vector)/2).Distinct().ToDictionary(x => x, x => 0d);
 
             Dictionary<Vertex, double> angles = 
                 allDots
-                .Union(
+                .Concat(
                     GetEndpoints(origin)
                     .Select(x => new Vertex(x, null, 0)))
                 .ToDictionary(x => x, x => x.vector.Angle(origin));
-            /*IEnumerable<(double, IEnumerable<Vertex>)> allDotsByAngles =
-                angles
-                .Select(x => x.Value)
-                .Distinct()
-                .OrderBy(x => x)
-                .Select(x =>
-                    (x,
-                    angles
-                    .Where(y => y.Value == x)
-                    .Select(y => y.Key)
-                    .OrderBy(y => y.vector.DistanceSquared(origin)
-                    )
-                ));*/
 
-            double previousAngle = 0;
-
-            bool IsVisible(Vertex target, double currentAngle)
+            bool IsVisible(Vertex target)
             {
                 // Line 1 of VISIBLE(wi)
+                if (!(originVert.polygon is null))
+                {
+                    if (originVert.IsNeighbor(target)) return true;
+                    if (originVert.BehindNeighbors(target.vector)) return false;
+                }
                 if (!(target.polygon is null))
                 {
-                    if (target.IsNeighbor(originVert)) return true;
-                    if (target.BehindNeighbors(origin)) return false; 
-                    if (!(originVert.polygon is null) && originVert.BehindNeighbors(target.vector)) return false; 
+                    if (target.BehindNeighbors(origin)) return false;
                     if (target.polygon.Intersects(origin, target.vector)) return false;
                 }
-                //if (currentAngle == previousAngle)
-                //if (!(target.polygon is null) && target.BehindNeighbors(origin.vector)) return false;
 
                 if (intersections.Count != 0) {
-                    SortableEdge min = intersections.Min;
-                    //if (Vector.IntersectingLines(min.first.vector, min.second.vector, origin, target.vector)) return false;
-                    if (min.CalculateDistance(currentAngle) < origin.Distance(target.vector)) return false;
+                    //Vertex min = intersections.Min;
+                    //if (CalculateDistance(min, origin, GetAngle()) < origin.Distance(target.vector)) return false;
+                    //return intersections.All(x => angles[x] == GetAngle() || CalculateDistance(x, origin, GetAngle()) >= target.vector.Distance(origin));
+                    return !intersections.Any(x => Vector.IntersectingLines(origin, target.vector, x.vector, x.Next.vector));
                 }
 
                 return true;
             }
 
+            //double edge = Math.PI * 1.5d;
+            //debugOut.Add((origin, origin + new Vector(Math.Cos(edge), Math.Sin(edge)) * 999));
             foreach ((Vertex vert, double currentAngle) in angles.OrderBy(x => x.Value))
             {
-                if (IsVisible(vert, currentAngle)) visibilityGraph.Add(vert.vector);
+                //if (angle < edge && edge <= currentAngle) debugOut.AddRange(intersections.Select(x => (x.vector, x.Next.vector)));
+                angle = currentAngle;
+
+                if (IsVisible(vert)) visibilityGraph.Add(vert);
 
                 if (vert.polygon is null) continue;
 
                 Vertex previous = vert.Previous;
-                if (previous.vector == origin || MathHelper.GetAngleSide(angles[previous], currentAngle) < 0) intersections.RemoveSimilar(previous);
-                //if (previous.vector == origin || intersections.ContainsSimilar(previous)) intersections.RemoveSimilar(previous);
-                else intersections.Add(new SortableEdge(previous, origin, currentAngle));
+                //if (previous.vector == origin || Vector.Orientation(previous.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise) intersections.Remove(previous);
+                if (previous.vector == origin || MathHelper.GetAngleSide(angles[previous], currentAngle) <= 0) intersections.Remove(previous);
+                else intersections.Add(previous);
 
-                if (vert.vector == origin || MathHelper.GetAngleSide(angles[vert], currentAngle) < 0) intersections.RemoveSimilar(vert);
-                //if (polygonVertex.Next.vector == origin || intersections.ContainsSimilar(polygonVertex)) intersections.RemoveSimilar(polygonVertex);
-                else intersections.Add(new SortableEdge(vert, origin, currentAngle));
-
-                previousAngle = currentAngle;
+                //if (vert.Next.vector == origin || Vector.Orientation(vert.Next.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise) intersections.Remove(vert);
+                if (vert.Next.vector == origin || MathHelper.GetAngleSide(angles[vert.Next], currentAngle) <= 0) intersections.Remove(vert);
+                else intersections.Add(vert);
             }
 
-            return visibilityGraph.Distinct().ToDictionary(x => x, x => x.Distance(origin));
+            debug = debugOut;
+            return visibilityGraph.Distinct().ToDictionary(x => x.vector, x => x.vector.Distance(origin));
         }
 
-        public Dictionary<Vector, Dictionary<Vector, double>> GenerateNavmap() => allDots
-            .Select(x => x.vector)
-            .Concat(new[] { startingPosition })
-            .ToDictionary(x => x, x => GenerateVisibilityGraph(x));
+        public Dictionary<Vector, Dictionary<Vector, double>> GenerateVisibilityGraph(out List<(Vector, Vector)> debug)
+        {
+            var debugOut = new List<(Vector, Vector)>();
+            var output =
+                allDots
+                .Select(x =>
+                {
+                    var polygon = GenerateVisibilityPolygon(x, out var add);
+                    debugOut.AddRange(add);
+                    return new KeyValuePair<Vector, Dictionary<Vector, double>>(x.vector, polygon);
+                })
+                .Concat(new[] { new KeyValuePair<Vector, Dictionary<Vector, double>>(startingPosition, GenerateVisibilityPolygon(startingPosition, out _)) })
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            //foreach (Vertex vert in allDots) debugOut.Add((vert.vector, vert.vector + vert.Normal * 5));
+            //foreach (Vertex vert in allDots) if (vert.IsConvex) debugOut.Add((vert.vector - vert.Normal * 5, vert.vector + vert.Normal * 5));
+            /*foreach (Vertex vert in allDots)
+            {
+                Vector vec = vert.Normal;
+                for (int i = 0; i < 4; i++) if (vert.BehindNeighbors((vec = new Vector(vec.y, -vec.x)) + vert.vector)) debugOut.Add((vert.vector, vert.vector + vec * 5));
+            }*/
+
+            debug = debugOut;
+            return output;
+        }
 
         public bool PossiblePath(Vector a, Vector b) => polygons.All(x => !x.Intersects(a, b));
 

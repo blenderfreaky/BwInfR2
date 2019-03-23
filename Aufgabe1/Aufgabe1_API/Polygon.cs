@@ -75,23 +75,25 @@ namespace Aufgabe1_API
         public Vertex Next => polygon[index + 1];
 
         // Assumes polygon to be properly oriented, i.e. FixDirection() has been executed
-        public bool IsConvex => Vector.AngleTo(Next.vector - vector, vector - Previous.vector) < Math.PI;
+        //public bool IsConvex => Vector.AngleTo(Next.vector - vector, vector - Previous.vector) < Math.PI;
+        public bool IsConvex => Vector.Orientation(Previous.vector, vector, Next.vector) == Vector.VectorOrder.Clockwise;
 
         public Vector Normal => IsConvex
-                              ? (Previous.vector - vector).Normalize() + (Next.vector - vector).Normalize() 
-                              : -((Previous.vector - vector).Normalize() + (Next.vector - vector).Normalize());
+                              ?  ((Previous.vector - vector).Normalize() + (Next.vector - vector).Normalize()).Normalize()
+                              : -((Previous.vector - vector).Normalize() + (Next.vector - vector).Normalize()).Normalize();
 
         public bool IsNeighbor(Vertex other) => Previous == other || Next == other;
 
+        // Assumes proper normals
         public bool BehindNeighbors(Vector other)
         {
             bool enclosed = Vector.Orientation(vector, Previous.vector, other) == Vector.VectorOrder.Counterclockwise
-                          ^ Vector.Orientation(vector, Next.vector, other) == Vector.VectorOrder.Counterclockwise;
+                          ^ Vector.Orientation(vector, Next.vector,     other) == Vector.VectorOrder.Counterclockwise;
             double dot = Vector.Dot(other - vector, Normal);
 
             return IsConvex
-                 ?  enclosed && dot < 0
-                 : !enclosed && dot <= 0;
+                 ? !enclosed || dot < 0
+                 :  enclosed && dot < 0;
         }
 
         public static bool operator ==(Vertex a, Vertex b) => a.polygon == b.polygon && a.index == b.index;

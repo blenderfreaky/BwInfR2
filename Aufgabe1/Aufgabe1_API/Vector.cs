@@ -22,7 +22,8 @@ namespace Aufgabe1_API
         }
 
         public double Angle() => MathHelper.ModuloAngle(Math.Atan2(y, x));
-        public double Angle(Vector origin) => MathHelper.ModuloAngle(Math.Atan2(y-origin.y, x-origin.x));
+        public double Angle(Vector origin) => MathHelper.ModuloAngle(Math.Atan2(y - origin.y, x - origin.x));
+        public static double Angle(Vector vec, Vector origin) => MathHelper.ModuloAngle(Math.Atan2(vec.y - origin.y, vec.x - origin.x));
 
         public double DistanceSquared(Vector other) => Math.Pow(x - other.x, 2) + Math.Pow(y - other.y, 2);
         public double Distance(Vector other) => Math.Sqrt(DistanceSquared(other));

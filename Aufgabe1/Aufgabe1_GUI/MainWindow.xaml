@@ -9,10 +9,13 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <material:PanBorder>
-            <Grid Background="White" MouseMove="Navmap_Move" >
-                <Canvas x:Name="Navmap" Margin="0" Loaded="Navmap_Loaded"/>
-                <Canvas x:Name="Polygons" Margin="0" Loaded="Polygons_Loaded"/>
-                <Canvas x:Name="Buspath" Margin="0" Loaded="Buspath_Loaded"/>
+            <Grid x:Name="Off" Background="White" MouseMove="Navmap_Move">
+                <Grid x:Name="Back">
+                    <Canvas x:Name="Polygons" Margin="0" Loaded="Polygons_Loaded"/>
+                    <Canvas x:Name="Buspath" Margin="0" Loaded="Buspath_Loaded"/>
+                    <Canvas x:Name="Navmap" Margin="0" Loaded="Navmap_Loaded"/>
+                    <Canvas x:Name="Debugging" Margin="0" Loaded="Navmap_Loaded"/>
+                </Grid>
             </Grid>
         </material:PanBorder>
     </Grid>
