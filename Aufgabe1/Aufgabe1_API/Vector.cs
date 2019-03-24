@@ -7,13 +7,11 @@ using static Aufgabe1_API.Vector;
 
 namespace Aufgabe1_API
 {
-    public class Vector
+    public class Vector : IComparable<Vector>
     {
         public double x, y;
 
-        public Vector()
-        { 
-        }
+        public Vector() { }
 
         public Vector(double x, double y)
         {
@@ -99,5 +97,7 @@ namespace Aufgabe1_API
         }
 
         public override string ToString() => $"x: {x} y: {y}";
+
+        public int CompareTo(Vector other) => x == other.x ? y.CompareTo(other.y) : x.CompareTo(other.x);
     }
 }

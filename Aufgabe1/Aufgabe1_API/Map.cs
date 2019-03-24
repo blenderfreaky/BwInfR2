@@ -12,8 +12,8 @@ namespace Aufgabe1_API
     {
         public Polygon[] polygons;
         public Vector[] busPath;
-        public Vector startingPosition;
-        public List<Vertex> allDots;
+        public Vertex startingPosition;
+        public List<Vertex> allPolygonVertices;
         public double busSpeed, characterSpeed, busApproachConstant;
 
         public Map(string[] lines)
@@ -32,36 +32,29 @@ namespace Aufgabe1_API
             }
 
             int[] start = lines[polygonCount + 1].Split().Select(x => int.Parse(x)).ToArray();
-            startingPosition = new Vector(start[0], start[1]);
+            startingPosition = new Vertex(new Vector(start[0], start[1]));
 
             busPath = new Vector[] { new Vector(0, 0), new Vector(0, 10000) };
 
             busSpeed = 30;
             characterSpeed = 15;
 
+            allPolygonVertices = polygons.SelectMany(x => x).ToList();
+
             busApproachConstant = characterSpeed / Math.Sqrt(busSpeed * busSpeed - characterSpeed * characterSpeed);
-            allDots = new List<Vertex>();
-            foreach (Polygon polygon in polygons)
-            {
-                polygon.FixDirection();
-                for (int i = 0; i < polygon.Length; i++) allDots.Add(polygon[i]);
-            }
         }
 
         public Map(Polygon[] polygons, Vector[] busPath, Vector startingPosition, double busSpeed, double characterSpeed)
         {
             this.polygons = polygons;
             this.busPath = busPath;
-            this.startingPosition = startingPosition;
+            this.startingPosition = new Vertex(startingPosition);
             this.busSpeed = busSpeed;
             this.characterSpeed = characterSpeed;
+
+            allPolygonVertices = polygons.SelectMany(x => x).ToList();
+
             busApproachConstant = characterSpeed / Math.Sqrt(busSpeed * busSpeed - characterSpeed * characterSpeed);
-            allDots = new List<Vertex>();
-            foreach (Polygon polygon in polygons)
-            {
-                polygon.FixDirection();
-                for (int i = 0; i < polygon.Length; i++) allDots.Add(polygon[i]);
-            }
         }
 
         public double CalculateDistance(Vertex vertex, Vector origin, double angle)
@@ -71,69 +64,60 @@ namespace Aufgabe1_API
             return ((a.y - b.y) * b.x - (a.x - b.x) * b.y) / (Math.Cos(angle) * (a.y - b.y) - Math.Sin(angle) * (a.x - b.x));
         }
 
-        public Dictionary<Vector, double> GenerateVisibilityPolygon(Vector origin, out List<(Vector, Vector)> debug) => GenerateVisibilityPolygon(new Vertex(origin, null, 0), out debug);
-        public Dictionary<Vector, double> GenerateVisibilityPolygon(Vertex originVert, out List<(Vector, Vector)> debug)
+        public List<Vertex> GenerateVisibilityPolygon(Vector origin, bool reduced, out List<Vertex> endpoints, out List<(Vector, Vector)> debug) => GenerateVisibilityPolygon(new Vertex(origin), reduced, out endpoints, out debug);
+        public List<Vertex> GenerateVisibilityPolygon(Vertex originVert, bool reduced, out List<Vertex> endpoints, out List<(Vector, Vector)> debug)
         {
             List<(Vector, Vector)> debugOut = new List<(Vector, Vector)>();
 
             Vector origin = originVert.vector;
 
             List<Vertex> visibilityGraph = new List<Vertex>();
-            List<Vertex> allDots = this.allDots.Where(x => x.vector != origin).ToList();
+            List<Vertex> allPolygonVertices = this.allPolygonVertices.Where(x => x.vector != origin).ToList();
 
             double angle = 0;
             double GetAngle() => angle;
 
             // Edges are kept as the vertex with the lower index of the two defining vertices
-            SortedSet<Vertex> intersections = new SortedSet<Vertex>(Comparer<Vertex>.Create((a, b) => CalculateDistance(a, origin, GetAngle()).CompareTo(CalculateDistance(b, origin, GetAngle()))));
-            //List<Vertex> intersections = new List<Vertex>();
+            IComparer<Vertex> comparer = Comparer<Vertex>.Create((a, b) => CalculateDistance(a, origin, GetAngle()).CompareTo(CalculateDistance(b, origin, GetAngle())));
+            //SortedSet<Vertex> intersections = new SortedSet<Vertex>(comparer);
+            List<Vertex> intersections = new List<Vertex>();
 
-            foreach (Vertex polygonVertex in allDots)
+            foreach (Vertex polygonVertex in allPolygonVertices)
             {
                 Vector a = polygonVertex.vector - origin;
                 Vector b = polygonVertex.Next.vector - origin;
 
-                // Intersections with x+ Axis
-                /*if (a.y * b.y <= 0
-                 && (a.x > 0 || b.x > 0)
-                 && (a.y == b.y
-                   ? a.y == 0
-                   : (a.x >= a.y * (b.x - a.x) / (b.y - a.y))))*/
                 if (a.y * b.y <= 0 && CalculateDistance(polygonVertex, origin, 0) >= 0)
                 {
                     intersections.Add(polygonVertex);
                 }
             }
 
-            //return new Dictionary<Vector, double> { { intersections.Count == 0 ? origin : (intersections.Min.first.vector + intersections.Min.second.vector) / 2, 0 } };
-            //return intersections.Select(x => (x.vector + x.Next.vector)/2).Distinct().ToDictionary(x => x, x => 0d);
-
+            endpoints = GetEndpoints(origin).Select(x => new Vertex(x)).ToList();
             Dictionary<Vertex, double> angles = 
-                allDots
-                .Concat(
-                    GetEndpoints(origin)
-                    .Select(x => new Vertex(x, null, 0)))
+                allPolygonVertices
+                .Concat(endpoints)
                 .ToDictionary(x => x, x => x.vector.Angle(origin));
 
             bool IsVisible(Vertex target)
             {
-                // Line 1 of VISIBLE(wi)
                 if (!(originVert.polygon is null))
                 {
                     if (originVert.IsNeighbor(target)) return true;
+                    if (reduced && originVert.BehindNeighbors(2 * origin - target.vector)) return false;
                     if (originVert.BehindNeighbors(target.vector)) return false;
                 }
                 if (!(target.polygon is null))
                 {
                     if (target.BehindNeighbors(origin)) return false;
+                    if (reduced && target.BehindNeighbors(2 * target.vector - origin)) return false;
                     if (target.polygon.Intersects(origin, target.vector)) return false;
                 }
 
                 if (intersections.Count != 0) {
-                    //Vertex min = intersections.Min;
-                    //if (CalculateDistance(min, origin, GetAngle()) < origin.Distance(target.vector)) return false;
-                    //return intersections.All(x => angles[x] == GetAngle() || CalculateDistance(x, origin, GetAngle()) >= target.vector.Distance(origin));
                     return !intersections.Any(x => Vector.IntersectingLines(origin, target.vector, x.vector, x.Next.vector));
+                    //var x = intersections.First();
+                    //return !Vector.IntersectingLines(origin, target.vector, x.vector, x.Next.vector);
                 }
 
                 return true;
@@ -155,39 +139,69 @@ namespace Aufgabe1_API
                 if (previous.vector == origin || MathHelper.GetAngleSide(angles[previous], currentAngle) <= 0) intersections.Remove(previous);
                 else intersections.Add(previous);
 
+                Vertex next = vert.Next;
                 //if (vert.Next.vector == origin || Vector.Orientation(vert.Next.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise) intersections.Remove(vert);
-                if (vert.Next.vector == origin || MathHelper.GetAngleSide(angles[vert.Next], currentAngle) <= 0) intersections.Remove(vert);
+                if (next.vector == origin || MathHelper.GetAngleSide(angles[next], currentAngle) <= 0) intersections.Remove(vert);
                 else intersections.Add(vert);
             }
 
+            var polygon = visibilityGraph.Distinct().ToList();
             debug = debugOut;
-            return visibilityGraph.Distinct().ToDictionary(x => x.vector, x => x.vector.Distance(origin));
+            return polygon;
         }
 
-        public Dictionary<Vector, Dictionary<Vector, double>> GenerateVisibilityGraph(out List<(Vector, Vector)> debug)
+        public Dictionary<Vertex, List<Vertex>> GenerateVisibilityGraph(bool reduced, out List<Vertex> endpoints, out List<(Vector, Vector)> debug)
         {
             var debugOut = new List<(Vector, Vector)>();
-            var output =
-                allDots
-                .Select(x =>
+            var endpointsOut = new List<Vertex>();
+            var graph =
+                allPolygonVertices
+                .Concat(new[] { startingPosition })
+                .ToDictionary(x => x, x =>
                 {
-                    var polygon = GenerateVisibilityPolygon(x, out var add);
-                    debugOut.AddRange(add);
-                    return new KeyValuePair<Vector, Dictionary<Vector, double>>(x.vector, polygon);
-                })
-                .Concat(new[] { new KeyValuePair<Vector, Dictionary<Vector, double>>(startingPosition, GenerateVisibilityPolygon(startingPosition, out _)) })
-                .ToDictionary(x => x.Key, x => x.Value);
-
-            //foreach (Vertex vert in allDots) debugOut.Add((vert.vector, vert.vector + vert.Normal * 5));
-            //foreach (Vertex vert in allDots) if (vert.IsConvex) debugOut.Add((vert.vector - vert.Normal * 5, vert.vector + vert.Normal * 5));
-            /*foreach (Vertex vert in allDots)
-            {
-                Vector vec = vert.Normal;
-                for (int i = 0; i < 4; i++) if (vert.BehindNeighbors((vec = new Vector(vec.y, -vec.x)) + vert.vector)) debugOut.Add((vert.vector, vert.vector + vec * 5));
-            }*/
+                    var polygon = GenerateVisibilityPolygon(x, reduced, out var newEndpoints, out var newDebug);
+                    debugOut.AddRange(newDebug);
+                    endpointsOut.AddRange(newEndpoints);
+                    return polygon;
+                });
 
             debug = debugOut;
-            return output;
+            endpoints = endpointsOut;
+            return graph;
+        }
+
+        public Dictionary<Vertex, Vertex> GenerateDijkstraHeuristic(bool reduced, out Dictionary<Vertex, Dictionary<Vertex, double>> visitedNodes, out List<Vertex> endpoints, out List<(Vector, Vector)> debug)
+        {
+            List<Vertex> allVertices = allPolygonVertices.Concat(new[] { startingPosition }).ToList();
+
+            var debugOut = new List<(Vector, Vector)>();
+            var endpointsOut = new List<Vertex>();
+
+            Dictionary<Vertex, Func<Dictionary<Vertex, double>>> graph = 
+                allVertices.ToDictionary(x => x, x =>
+                (Func<Dictionary<Vertex, double>>)(() => 
+                    {
+                        var polygon = GenerateVisibilityPolygon(x, reduced, out var newEndpoints, out var newDebug);
+                        debugOut.AddRange(newDebug);
+                        endpointsOut.AddRange(newEndpoints);
+                        return polygon.ToDictionary(y => y, y => y.vector.Distance(x.vector));
+                    }
+                ));
+
+            var dijkstra = Dijkstra.GenerateDijkstraHeuristicLazy(startingPosition, graph, endpointsOut, out visitedNodes);
+            debug = debugOut;
+            endpoints = endpointsOut;
+            return dijkstra;
+        }
+
+        public List<Vertex> GetOptimalPath(out List<(Vector, Vector)> debug)
+        {
+            var heuristic = GenerateDijkstraHeuristic(true, out var visitedNodes, out var endpoints, out debug);
+
+            Dictionary<Vertex, double> times = endpoints.Where(x => heuristic.ContainsKey(x)).ToDictionary(x => x, 
+                x => Dijkstra.GetPathLength(startingPosition, x, heuristic, visitedNodes) * characterSpeed - GetBusDuration(x.vector) * busSpeed);
+
+            return Dijkstra.GetPath(startingPosition, times.Min(x => x.Value).value.Key, heuristic);
         }
 
         public bool PossiblePath(Vector a, Vector b) => polygons.All(x => !x.Intersects(a, b));
@@ -205,6 +219,23 @@ namespace Aufgabe1_API
 
                 yield return busPath[i] + busPathNormal * (distance < 0 ? 0 : distance > 1 ? 1 : distance);
             }
+        }
+
+        public double GetBusDuration(Vector vec)
+        {
+            double distance = 0;
+            for (int i = 0; i < busPath.Length - 1; i++)
+            {
+                (Vector start, Vector end) = (busPath[i], busPath[i + 1]);
+
+                double segmentLength = start.DistanceSquared(end);
+                distance += segmentLength;
+
+                if (Vector.Orientation(start, end, vec) != Vector.VectorOrder.Colinear) continue;
+
+                return distance - end.Distance(vec);
+            }
+            return double.PositiveInfinity;
         }
     }
 }

@@ -45,9 +45,9 @@ namespace Aufgabe1
 
             InitializeComponent();
 
-            double off = 1000;
+            double off = 100000;
             Off.Margin = new Thickness(-off);
-            Back.Margin = new Thickness(off, off + map.allDots.Average(x => x.vector.y)*2, off, off);
+            Back.Margin = new Thickness(off, off + map.allPolygonVertices.Average(x => x.vector.y)*2, off, off);
         }
 
         private void Polygons_Loaded(object sender, RoutedEventArgs e)
@@ -81,42 +81,42 @@ namespace Aufgabe1
                 });
         }
 
-        private void Navmap_Loaded(object sender, RoutedEventArgs e) => DrawNavmap();
-        private void Navmap_Move(object sender, RoutedEventArgs e) => DrawNavmap();
-        private void DrawNavmap()
+        private void Navmap_Loaded(object sender, RoutedEventArgs e) => Draw();
+        private void Navmap_Move(object sender, RoutedEventArgs e) => Draw();
+
+        private void Draw() => DrawOptimalPath();
+
+        private void DrawVisibilityPolygon()
+        {
+            Point mousePositionPoint = Mouse.GetPosition(Navmap);
+            Vector mousePosition = new Vector(mousePositionPoint.X, -mousePositionPoint.Y);
+
+            DrawStuff(map.GenerateVisibilityPolygon(mousePosition, true, out _, out var debug).Select(x => (mousePosition, x.vector)), debug);
+        }
+        private void DrawVisibilityGraph() => DrawStuff(map.GenerateVisibilityGraph(true, out _, out var debug)
+            .SelectMany(x => x.Value.Select(y => y.vector.CompareTo(x.Key.vector) < 0 ? (y.vector, x.Key.vector) : (x.Key.vector, y.vector)))
+            .Distinct(), debug);
+        private void DrawDijkstraHeuristic() => 
+            DrawStuff(map.GenerateDijkstraHeuristic(true, out _, out _, out var debug).Select(x => (x.Key.vector, x.Value.vector)), debug);
+        private void DrawOptimalPath()
+        {
+            var optimalPath = map.GetOptimalPath(out var debug);
+            List<(Vector, Vector)> vertices = new List<(Vector, Vector)>();
+            for (int i = 0; i < optimalPath.Count - 1; i++) vertices.Add((optimalPath[i].vector, optimalPath[i+1].vector));
+            DrawStuff(vertices, debug);
+        }
+
+        private void DrawStuff(IEnumerable<(Vector, Vector)> vertices, IEnumerable<(Vector, Vector)> debug)
         {
             Navmap.Children.Clear();
             Debugging.Children.Clear();
 
-            List<(Vector, Vector)> debug;
-            foreach (var origin in map.GenerateVisibilityGraph(out debug))
+            foreach ((Vector a, Vector b) in vertices)
             {
-                foreach (var target in origin.Value)
-                {
-                    Navmap.Children.Add(
-                        new Line
-                        {
-                            Stroke = Brushes.Red,
-                            Fill = Brushes.Transparent,
-                            StrokeThickness = 0.8,
-                            VerticalAlignment = VerticalAlignment.Center,
-                            HorizontalAlignment = HorizontalAlignment.Center,
-
-                            X1 = origin.Key.x,
-                            Y1 = -origin.Key.y,
-
-                            X2 = target.Key.x,
-                            Y2 = -target.Key.y,
-                        }
-                    );
-                }
-            }
-            foreach ((Vector a, Vector b) in debug)
-            {
-                Debugging.Children.Add(
+                Navmap.Children.Add(
                     new Line
                     {
-                        Stroke = Brushes.Blue,
+                        Stroke = Brushes.Red,
                         Fill = Brushes.Transparent,
                         StrokeThickness = 1,
                         VerticalAlignment = VerticalAlignment.Center,
@@ -130,36 +130,6 @@ namespace Aufgabe1
                     }
                 );
             }
-        }
-        private void DrawVisibilityGraph()
-        {
-            Point mousePositionPoint = Mouse.GetPosition(Navmap);
-            Vector mousePosition = new Vector(mousePositionPoint.X, -mousePositionPoint.Y);
-            //Vector mousePosition = new Vector(148, 141);
-
-            Navmap.Children.Clear();
-
-            List<(Vector, Vector)> debug;
-            foreach (var origin in map.GenerateVisibilityPolygon(mousePosition, out debug))
-            {
-                Navmap.Children.Add(
-                    new Line
-                    {
-                        Stroke = Brushes.Red,
-                        Fill = Brushes.Transparent,
-                        StrokeThickness = 0.8,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-
-                        X1 = origin.Key.x,
-                        Y1 = -origin.Key.y,
-
-                        X2 = mousePosition.x,
-                        Y2 = -mousePosition.y,
-                    }
-                );
-            }
-
             foreach ((Vector a, Vector b) in debug)
             {
                 Debugging.Children.Add(
