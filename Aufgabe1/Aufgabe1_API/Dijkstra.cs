@@ -46,7 +46,7 @@ namespace Aufgabe1_API
         public static List<Vertex> GetPath(Vertex start, Vertex end, Dictionary<Vertex, Vertex> heuristic)
         {
             List<Vertex> path = new List<Vertex>();
-            for (Vertex current = end; current != start; current = heuristic[current]) path.Add(current);
+            for (Vertex current = end, next = heuristic[end]; current != start; current = next, next = heuristic[current]) path.Add(current);
             path.Add(start);
             return path;
         }
@@ -54,7 +54,7 @@ namespace Aufgabe1_API
         public static double GetPathLength(Vertex start, Vertex end, Dictionary<Vertex, Vertex> heuristic, Dictionary<Vertex, Dictionary<Vertex, double>> visitedNodes)
         { 
             double length = 0;
-            for (Vertex current = end; current != start; current = heuristic[current]) length += visitedNodes[current][heuristic[current]];
+            for (Vertex current = end, next = heuristic[end]; current != start; current = next, next = heuristic[current]) length += visitedNodes[next][current];
             return length;
         }
     }
