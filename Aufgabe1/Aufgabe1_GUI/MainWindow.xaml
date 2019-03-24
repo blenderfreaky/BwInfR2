@@ -18,5 +18,21 @@
                 </Grid>
             </Grid>
         </material:PanBorder>
+        <DockPanel>
+            <Grid Background="#FFFF4141" HorizontalAlignment="Left">
+                <StackPanel Orientation="Vertical">
+                    <material:MaterialButton Click="Button_Click" Width="30" Height="30" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="Black" HorizontalAlignment="Left">
+                        <Grid Margin="0">
+                            <Line StrokeThickness="2" Margin="0" Stroke="White" X1="6" X2="24" Y1= "8" Y2= "8" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <Line StrokeThickness="2" Margin="0" Stroke="White" X1="6" X2="24" Y1="15" Y2="15" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <Line StrokeThickness="2" Margin="0" Stroke="White" X1="6" X2="24" Y1="22" Y2="22" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Grid>
+                    </material:MaterialButton>
+                    <StackPanel x:Name="AdvancedOptions" Orientation="Vertical">
+                        <material:MaterialButton Text="Show Debug" CornerRadius="3" Background="#FFFF4141" Foreground="White" Width="145"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </DockPanel>
     </Grid>
 </material:MaterialWindow>

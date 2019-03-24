@@ -91,22 +91,22 @@ namespace Aufgabe1
             Point mousePositionPoint = Mouse.GetPosition(Navmap);
             Vector mousePosition = new Vector(mousePositionPoint.X, -mousePositionPoint.Y);
 
-            DrawStuff(map.GenerateVisibilityPolygon(mousePosition, true, out _, out var debug).Select(x => (mousePosition, x.vector)), debug);
+            DrawLines(map.GenerateVisibilityPolygon(mousePosition, true, out _, out var debug).Select(x => (mousePosition, x.vector)), debug);
         }
-        private void DrawVisibilityGraph() => DrawStuff(map.GenerateVisibilityGraph(true, out _, out var debug)
+        private void DrawVisibilityGraph() => DrawLines(map.GenerateVisibilityGraph(true, out _, out var debug)
             .SelectMany(x => x.Value.Select(y => y.vector.CompareTo(x.Key.vector) < 0 ? (y.vector, x.Key.vector) : (x.Key.vector, y.vector)))
             .Distinct(), debug);
         private void DrawDijkstraHeuristic() => 
-            DrawStuff(map.GenerateDijkstraHeuristic(true, out _, out _, out var debug).Select(x => (x.Key.vector, x.Value.vector)), debug);
+            DrawLines(map.GenerateDijkstraHeuristic(true, out _, out _, out var debug).Select(x => (x.Key.vector, x.Value.vector)), debug);
         private void DrawOptimalPath()
         {
             var optimalPath = map.GetOptimalPath(out var debug);
             List<(Vector, Vector)> vertices = new List<(Vector, Vector)>();
             for (int i = 0; i < optimalPath.Count - 1; i++) vertices.Add((optimalPath[i].vector, optimalPath[i+1].vector));
-            DrawStuff(vertices, debug);
+            DrawLines(vertices, debug);
         }
 
-        private void DrawStuff(IEnumerable<(Vector, Vector)> vertices, IEnumerable<(Vector, Vector)> debug)
+        private void DrawLines(IEnumerable<(Vector, Vector)> vertices, IEnumerable<(Vector, Vector)> debug)
         {
             Navmap.Children.Clear();
             Debugging.Children.Clear();
@@ -149,6 +149,11 @@ namespace Aufgabe1
                     }
                 );
             }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            AdvancedOptions.Visibility = AdvancedOptions.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
     }
 }
