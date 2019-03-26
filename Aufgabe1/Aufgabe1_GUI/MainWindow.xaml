@@ -20,17 +20,23 @@
         </material:PanBorder>
         <DockPanel>
             <Grid Background="#FFFF4141" HorizontalAlignment="Left">
-                <StackPanel Orientation="Vertical">
-                    <material:MaterialButton Click="Button_Click" Width="30" Height="30" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="Black" HorizontalAlignment="Left">
+                <material:MaterialButton Click="OpenAdvanced_Click" Width="30" Height="30" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="Black" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Grid Margin="0">
+                        <Line StrokeThickness="2" Margin="0" Stroke="White" X1="6" X2="24" Y1= "8" Y2= "8" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <Line StrokeThickness="2" Margin="0" Stroke="White" X1="6" X2="24" Y1="15" Y2="15" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <Line StrokeThickness="2" Margin="0" Stroke="White" X1="6" X2="24" Y1="22" Y2="22" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Grid>
+                </material:MaterialButton>
+                <StackPanel x:Name="AdvancedOptions" Orientation="Vertical" Margin="0,0,0,0">
+                    <material:MaterialButton Click="CloseAdvanced_Click" Width="30" Height="30" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="Black" HorizontalAlignment="Left">
                         <Grid Margin="0">
                             <Line StrokeThickness="2" Margin="0" Stroke="White" X1="6" X2="24" Y1= "8" Y2= "8" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             <Line StrokeThickness="2" Margin="0" Stroke="White" X1="6" X2="24" Y1="15" Y2="15" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             <Line StrokeThickness="2" Margin="0" Stroke="White" X1="6" X2="24" Y1="22" Y2="22" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         </Grid>
                     </material:MaterialButton>
-                    <StackPanel x:Name="AdvancedOptions" Orientation="Vertical">
-                        <material:MaterialButton Text="Show Debug" CornerRadius="3" Background="#FFFF4141" Foreground="White" Width="145"/>
-                    </StackPanel>
+                    <material:MaterialButton Text="Normals" CornerRadius="3" Background="#FFFF4141" Foreground="White" Width="160" Height="25" IsToggleButton="True"/>
+                    <material:MaterialButton Text="Mouse Ray" CornerRadius="3" Background="#FFFF4141" Foreground="White" Width="160" Height="25" IsToggleButton="True"/>
                 </StackPanel>
             </Grid>
         </DockPanel>

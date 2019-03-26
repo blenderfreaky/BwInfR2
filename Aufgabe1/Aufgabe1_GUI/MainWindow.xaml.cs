@@ -30,7 +30,7 @@ namespace Aufgabe1
         public MainWindow()
         {
             string root = "../../../../Examples/Aufgabe1/";
-            map = new Map(File.ReadAllLines(root + "lisarennt3.txt"));
+            map = new Map(File.ReadAllLines(root + "lisarennt5.txt"));
             
             /**
             map = new Map(new Polygon[] 
@@ -84,7 +84,7 @@ namespace Aufgabe1
         private void Navmap_Loaded(object sender, RoutedEventArgs e) => Draw();
         private void Navmap_Move(object sender, RoutedEventArgs e) => Draw();
 
-        private void Draw() => DrawOptimalPath();
+        private void Draw() => DrawVisibilityGraph();
 
         private void DrawVisibilityPolygon()
         {
@@ -151,9 +151,7 @@ namespace Aufgabe1
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            AdvancedOptions.Visibility = AdvancedOptions.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
-        }
+        private void OpenAdvanced_Click(object sender, RoutedEventArgs e) => AdvancedOptions.Visibility = Visibility.Visible;
+        private void CloseAdvanced_Click(object sender, RoutedEventArgs e) => AdvancedOptions.Visibility = Visibility.Collapsed;
     }
 }

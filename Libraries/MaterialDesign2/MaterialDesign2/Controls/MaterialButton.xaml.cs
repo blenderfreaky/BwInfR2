@@ -338,26 +338,14 @@ namespace MaterialDesign2.Controls
             base.OnApplyTemplate();
         }
 
-        private void MaterialButton_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            TimeSpan duration = TimeSpan.FromSeconds(HoverShowDuration);
+        private void MaterialButton_MouseUp(object sender, MouseButtonEventArgs e) 
+            => AnimateShadow(HoverShadowDepth, HoverShadowOpacity, HoverShadowRadius, TimeSpan.FromSeconds(HoverShowDuration));
 
-            AnimateShadow(HoverShadowDepth, HoverShadowOpacity, HoverShadowRadius, duration);
-        }
+        private void MaterialButton_MouseDown(object sender, MouseButtonEventArgs e) 
+            => AnimateShadow(TouchShadowDepth, TouchShadowOpacity, TouchShadowRadius, TimeSpan.FromSeconds(HoverHideDuration));
 
-        private void MaterialButton_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            TimeSpan duration = TimeSpan.FromSeconds(HoverHideDuration);
-
-            AnimateShadow(TouchShadowDepth, TouchShadowOpacity, TouchShadowRadius, duration);
-        }
-
-        private void MaterialButton_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            var OpacityBrush = (VisualBrush)Template.FindName("OpacityBrush", this);
-
-            OpacityBrush.Viewport = new Rect(0, 0, e.NewSize.Width, e.NewSize.Height);
-        }
+        private void MaterialButton_SizeChanged(object sender, SizeChangedEventArgs e) 
+            => ((VisualBrush)Template.FindName("OpacityBrush", this)).Viewport = new Rect(0, 0, e.NewSize.Width, e.NewSize.Height);
         
         private void MaterialButton_FocusableChanged(object sender, DependencyPropertyChangedEventArgs e)
         {

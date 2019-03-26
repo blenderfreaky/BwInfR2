@@ -58,8 +58,8 @@ namespace Aufgabe1_API
             double dot = Vector.Dot(other - vector, normal);
 
             return isConvex
-                 ? !enclosed || dot < 0
-                 : enclosed && dot < 0;
+                    ? !enclosed || dot < 0
+                    : enclosed && dot < 0;
         }
 
         public static bool operator ==(Vertex a, Vertex b) => 
@@ -76,6 +76,5 @@ namespace Aufgabe1_API
             hashCode = hashCode * -1521134295 + index.GetHashCode();
             return hashCode;
         }
-
     }
 }
