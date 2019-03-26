@@ -93,7 +93,16 @@ namespace Aufgabe1
 
             DrawLines(map.GenerateVisibilityPolygon(mousePosition, true, out _, out var debug).Select(x => (mousePosition, x.vector)), debug);
         }
-        private void DrawVisibilityGraph() => DrawLines(map.GenerateVisibilityGraph(true, out _, out var debug)
+        private void DrawVisibilityPolygonVertex()
+        {
+            Point mousePositionPoint = Mouse.GetPosition(Navmap);
+            Vector mousePosition = new Vector(mousePositionPoint.X, -mousePositionPoint.Y);
+            Vertex vert = map.allPolygonVertices.MinValue(x => x.vector.Distance(mousePosition)).value;
+
+            DrawLines(map.GenerateVisibilityPolygon(vert, true, out _, out var debug).Select(x => (vert.vector, x.vector)), debug);
+        }
+        private void DrawVisibilityGraph() => 
+            DrawLines(map.GenerateVisibilityGraph(true, out _, out var debug)
             .SelectMany(x => x.Value.Select(y => y.vector.CompareTo(x.Key.vector) < 0 ? (y.vector, x.Key.vector) : (x.Key.vector, y.vector)))
             .Distinct(), debug);
         private void DrawDijkstraHeuristic() => 

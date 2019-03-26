@@ -18,7 +18,7 @@ namespace MaterialDesign2.Controls
     /// <summary>
     /// Interaction logic for MaterialSwitch.xaml
     /// </summary>
-    public partial class MaterialSwitch : MaterialButton
+    public partial class MaterialSwitch : UserControl
     {
         public MaterialSwitch()
         {

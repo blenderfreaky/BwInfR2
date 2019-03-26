@@ -8,9 +8,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="100" d:DesignWidth="200">
     <UserControl.Resources>
-        <Converters:Multiplier x:Key="Multiplier"/>
+        <Converters:CornerRadiusDoubleMultiplier x:Key="CornerRadiusDoubleMultiplier"/>
     </UserControl.Resources>
     <Grid>
-        <Border CornerRadius="{Binding ActualHeight, ConverterParameter=0.5, Converter={StaticResource ThicknessDoubleMultiplier}, Mode=OneWay, RelativeSource={RelativeSource Self}}" Background="Black"/>
+        <Border CornerRadius="{Binding ActualHeight, ConverterParameter=0.5, Converter={StaticResource CornerRadiusDoubleMultiplier}, Mode=OneWay, RelativeSource={RelativeSource Self}}" Background="Black"/>
     </Grid>
 </UserControl>
