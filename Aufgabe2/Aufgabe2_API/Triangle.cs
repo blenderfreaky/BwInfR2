@@ -6,8 +6,14 @@ using System.Threading.Tasks;
 
 namespace Aufgabe2_API
 {
-    public struct Triangle
+    public struct TriangleArchetype
     {
-        public double[] angles, lenghts;
+        public double[] angles, lenths;
+    }
+
+    public class Triangle
+    {
+        public Vector a, b, c;
+
     }
 }

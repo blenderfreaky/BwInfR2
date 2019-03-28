@@ -84,7 +84,7 @@ namespace Aufgabe1
         private void Navmap_Loaded(object sender, RoutedEventArgs e) => Draw();
         private void Navmap_Move(object sender, RoutedEventArgs e) => Draw();
 
-        private void Draw() => DrawVisibilityGraph();
+        private void Draw() => DrawVisibilityPolygonVertex();
 
         private void DrawVisibilityPolygon()
         {

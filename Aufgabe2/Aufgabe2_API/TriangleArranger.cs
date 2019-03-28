@@ -8,5 +8,9 @@ namespace Aufgabe2_API
 {
     public static class TriangleArranger
     {
+        public static List<(Vector, Vector, Vector)> ArrangeTriangles(List<TriangleArchetype> triangleArchetypes)
+        {
+
+        }
     }
 }

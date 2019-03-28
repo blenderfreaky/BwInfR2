@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization.Formatters;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Aufgabe1_API
 {
@@ -63,7 +59,7 @@ namespace Aufgabe1_API
             Vector b = vertex.Next.vector - origin;
             return ((a.y - b.y) * b.x - (a.x - b.x) * b.y) / (Math.Cos(angle) * (a.y - b.y) - Math.Sin(angle) * (a.x - b.x));
         }
-
+        int n = 0;
         public List<Vertex> GenerateVisibilityPolygon(Vector origin, bool reduced, out List<Vertex> endpoints, out List<(Vector, Vector)> debug) => GenerateVisibilityPolygon(new Vertex(origin), reduced, out endpoints, out debug);
         public List<Vertex> GenerateVisibilityPolygon(Vertex originVert, bool reduced, out List<Vertex> endpoints, out List<(Vector, Vector)> debug)
         {
@@ -79,7 +75,7 @@ namespace Aufgabe1_API
 
             // Edges are kept as the vertex with the lower index of the two defining vertices
             IComparer<Vertex> comparer = Comparer<Vertex>.Create((a, b) 
-                => CalculateDistance(a, origin, GetAngle()).Let(x => x == 0 ? double.PositiveInfinity : 0).CompareTo(CalculateDistance(b, origin, GetAngle().Let(x => x == 0 ? double.PositiveInfinity : 0))));
+                => CalculateDistance(a, origin, GetAngle()).Let(x => x == 0 ? double.PositiveInfinity : x).CompareTo(CalculateDistance(b, origin, GetAngle().Let(x => x == 0 ? double.PositiveInfinity : x))));
             //SortedSet<Vertex> intersections = new SortedSet<Vertex>(comparer);
             List<Vertex> intersections = new List<Vertex>();
 
@@ -127,29 +123,39 @@ namespace Aufgabe1_API
                 return true;
             }
 
-            //double edge = Math.PI * 0.5d;
-            //Vector dir = new Vector(Math.Cos(edge), Math.Sin(edge));
+            double edge = Math.PI * (n++/2)*0.1d;
+            Vector dir = new Vector(Math.Cos(edge), Math.Sin(edge));
             //Vector dirCrossed = new Vector(dir.y, -dir.x);
-            //debugOut.Add((origin, origin + dir * 999));
+            debugOut.Add((origin, origin + dir * 9999));
+            List<Vertex> delta = new List<Vertex>();
             foreach ((Vertex vert, double currentAngle) in angles.OrderBy(x => x.Value))
             {
-                //if (angle < edge && edge <= currentAngle) debugOut.AddRange(intersections.Select(x => (x.vector, x.Next.vector)));
-                //if (angle < edge && edge <= currentAngle) debugOut.AddRange(intersections.Select(x => CalculateDistance(x, origin, edge).Let(y => (origin + dir * y - dirCrossed * 8, origin + dir * y + dirCrossed * 8))));
+                double prevAngle = angle;
                 angle = currentAngle;
+                if (!(vert.polygon is null))
+                {
+                    Vertex previous = vert.Previous;
+                    if (previous.vector == origin || Vector.Orientation(previous.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise) intersections.Remove(previous);
+                    //if (previous == originVert || MathHelper.GetAngleSide(angles[previous], currentAngle) <= 0) intersections.RemoveSorted(previous, comparer);
+                    else delta.Add(previous);
+
+                    Vertex next = vert.Next;
+                    if (vert.Next.vector == origin || Vector.Orientation(vert.Next.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise) intersections.Remove(vert);
+                    //if (next == originVert || MathHelper.GetAngleSide(angles[next], currentAngle) <= 0) intersections.RemoveSorted(vert, comparer);
+                    else delta.Add(vert);
+                }
 
                 if (IsVisible(vert)) visibilityGraph.Add(vert);
 
-                if (vert.polygon is null) continue;
+                if (angle != currentAngle)
+                {
+                    //if (angle < edge && edge <= currentAngle && intersections.Count != 0) debugOut.Add((intersections.First().vector, intersections.First().Next.vector));
+                    if (prevAngle < edge && edge <= currentAngle) debugOut.AddRange(intersections.Select(x => (x.vector, x.Next.vector)));
+                    //if (angle < edge && edge <= currentAngle) debugOut.AddRange(intersections.Select(x => CalculateDistance(x, origin, edge).Let(y => (origin + dir * y - dirCrossed * 8, origin + dir * y + dirCrossed * 8))));
 
-                Vertex previous = vert.Previous;
-                //if (previous.vector == origin || Vector.Orientation(previous.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise) intersections.Remove(previous);
-                if (previous == originVert || MathHelper.GetAngleSide(angles[previous], currentAngle) <= 0) intersections.RemoveSorted(previous, comparer);
-                else intersections.AddSorted(previous, comparer);
-
-                Vertex next = vert.Next;
-                //if (vert.Next.vector == origin || Vector.Orientation(vert.Next.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise) intersections.Remove(vert);
-                if (next == originVert || MathHelper.GetAngleSide(angles[next], currentAngle) <= 0) intersections.RemoveSorted(vert, comparer);
-                else intersections.AddSorted(vert, comparer);
+                    delta.ForEach(x => intersections.AddSorted(x, comparer));
+                    delta.Clear();
+                }
             }
 
             var polygon = visibilityGraph.Distinct().ToList();
