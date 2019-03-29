@@ -10,7 +10,21 @@ namespace Aufgabe2_API
     {
         public static List<Triangle> ArrangeTriangles(List<TriangleArchetype> triangleArchetypes)
         {
-            List<TriangleArchetype> byMinAngles = triangleArchetypes.Select(x => new TriangleArchetype { angles = x.angles, lengths = x.lengths})
+            List<TriangleArchetype> byMinAngles = triangleArchetypes
+                .Select(x => Enumerable.Range(0, 3)
+                    .MinValue(y => x.angles[y])
+                    .Let(y => new TriangleArchetype {
+                        angles = Enumerable.Range(0, 3)
+                            .Select(z => x.angles[(z + y.value) % 3])
+                            .ToArray(),
+                        lengths = Enumerable.Range(0, 3)
+                            .Select(z => x.lengths[(z + y.value) % 3])
+                            .ToArray()
+                    }))
+                .OrderBy(x => x.angles[0])
+                .ToList();
+
+
         }
     }
 }
