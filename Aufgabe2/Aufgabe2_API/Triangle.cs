@@ -8,7 +8,7 @@ namespace Aufgabe2_API
 {
     public struct TriangleArchetype
     {
-        public double[] angles, lenths;
+        public double[] angles, lengths;
     }
 
     public class Triangle
