@@ -9,6 +9,14 @@ namespace Aufgabe2_API
     public struct TriangleArchetype
     {
         public double[] angles, lengths;
+
+        public TriangleArchetype(Triangle triangle)
+        {
+            angles = new double[3];
+            lengths = new double[3];
+
+            angles[0] = triangle
+        }
     }
 
     public class Triangle

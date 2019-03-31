@@ -14,7 +14,7 @@ namespace Aufgabe1_API
             while (angle > Math.PI * 2) angle -= Math.PI * 2;
             return angle;
         }
-        public static int GetAngleSide(double angle1, double angle2) => angle1 == angle2 ? 0 : ModuloAngle(angle2 - angle1).CompareTo(Math.PI);
+        public static int GetAngleSide(double angle1, double angle2) => ModuloAngle(angle2 - angle1) == 0 ? 0 : ModuloAngle(angle2 - angle1).CompareTo(Math.PI);
         public static double Clamp(double value, double min, double max) => value < min ? min : value > max ? max : value;
     }
 

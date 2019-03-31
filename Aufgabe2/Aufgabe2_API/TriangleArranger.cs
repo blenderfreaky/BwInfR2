@@ -8,7 +8,7 @@ namespace Aufgabe2_API
 {
     public static class TriangleArranger
     {
-        public static List<Triangle> ArrangeTriangles(List<TriangleArchetype> triangleArchetypes)
+        public static List<Triangle> ArrangeTriangles(List<TriangleArchetype> triangleArchetypes, out List<(Vector, Vector)> debug)
         {
             List<TriangleArchetype> byMinAngles = triangleArchetypes
                 .Select(x => Enumerable.Range(0, 3)
@@ -24,7 +24,9 @@ namespace Aufgabe2_API
                 .OrderBy(x => x.angles[0])
                 .ToList();
 
+            debug = new List<(Vector, Vector)>();
 
+            List<Triangle> triangles = new List<Triangle>();
         }
     }
 }

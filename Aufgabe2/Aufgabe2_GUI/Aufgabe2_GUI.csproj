@@ -98,5 +98,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Aufgabe2_API\Aufgabe2_API.csproj">
+      <Project>{682657DD-F3AB-42AB-9731-BFEF3A268977}</Project>
+      <Name>Aufgabe2_API</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
