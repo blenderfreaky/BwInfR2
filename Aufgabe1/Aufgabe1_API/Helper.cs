@@ -11,7 +11,7 @@ namespace Aufgabe1_API
         public static double ModuloAngle(double angle)
         {
             while (angle < 0) angle += Math.PI * 2;
-            while (angle > Math.PI * 2) angle -= Math.PI * 2;
+            while (angle >= Math.PI * 2) angle -= Math.PI * 2;
             return angle;
         }
         public static int GetAngleSide(double angle1, double angle2) => ModuloAngle(angle2 - angle1) == 0 ? 0 : ModuloAngle(angle2 - angle1).CompareTo(Math.PI);

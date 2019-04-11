@@ -13,11 +13,17 @@ namespace Aufgabe1_API
 
         public Vector() { }
 
+        public Vector(double angle) : this(Math.Cos(angle), Math.Sin(angle)) { }
+
         public Vector(double x, double y)
         {
             this.x = x;
             this.y = y;
         }
+
+        public Vector Left => new Vector(-y, x);
+        public Vector Right => new Vector(y, -x);
+        public Vector Back => new Vector(-x, -y);
 
         public double Angle() => MathHelper.ModuloAngle(Math.Atan2(y, x));
         public double Angle(Vector origin) => MathHelper.ModuloAngle(Math.Atan2(y - origin.y, x - origin.x));
@@ -56,11 +62,11 @@ namespace Aufgabe1_API
 
         #region Intersection
         //Algorithm from https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
-        public enum VectorOrder
+        public enum VectorOrder : int
         {
-            Colinear,
-            Clockwise,
-            Counterclockwise,
+            Colinear = -1,
+            Clockwise = 0,
+            Counterclockwise = 1,
         }
         public static VectorOrder Orientation(Vector a, Vector b, Vector c)
         {
@@ -86,7 +92,7 @@ namespace Aufgabe1_API
         }
         #endregion
 
-        public override bool Equals(object obj) => obj is Vector vec ? vec.x == x && vec.y == y : false;
+        public override bool Equals(object obj) => obj is Vector vec && vec.x == x && vec.y == y;
 
         public override int GetHashCode()
         {

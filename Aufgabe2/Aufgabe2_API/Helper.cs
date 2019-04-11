@@ -38,7 +38,7 @@ namespace Aufgabe2_API
         public static void AddSorted<T>(this List<T> list, T elem, IComparer<T> comparer)
             => list.BinarySearch(elem, comparer).Let(x => list.Insert(x < 0 ? ~x : x, elem));
         public static bool RemoveSorted<T>(this List<T> list, T elem, IComparer<T> comparer)
-            => list.BinarySearch(elem, comparer).Let(x => { if (x >= 0) list.RemoveAt(x); return x >= 0; });
+            => list.BinarySearch(elem, comparer).Let(x => { if (x >= 0) { list.RemoveAt(x); return true; } return false; });
         public static bool ContainsSorted<T>(this List<T> list, T elem, IComparer<T> comparer)
             => list.BinarySearch(elem, comparer) > 0;
     }

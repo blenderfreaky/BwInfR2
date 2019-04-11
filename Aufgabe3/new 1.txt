@@ -1,0 +1,12 @@
+Hunters move
+true >  false = suboptimal
+true > true = optimal
+false > false = always
+false > true = impossible
+prev implies next
+
+Hunteds move
+true > false = impossible
+true > true = optimal
+false > false = always
+false > true = suboptimal

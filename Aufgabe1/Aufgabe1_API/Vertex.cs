@@ -62,6 +62,9 @@ namespace Aufgabe1_API
                     : enclosed && dot < 0;
         }
 
+        public double Dot(Vertex other) => (Next.vector - vector).Normalize().Dot((other.Next.vector - other.vector).Normalize());
+        public double Dot(Vector start, Vector end) => (Next.vector - vector).Normalize().Dot((end-start).Normalize());
+
         public static bool operator ==(Vertex a, Vertex b) => 
               a.polygon == null || b.polygon == null 
             ? a.vector == b.vector 

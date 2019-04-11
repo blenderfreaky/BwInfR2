@@ -15,7 +15,7 @@ namespace Aufgabe2_API
             angles = new double[3];
             lengths = new double[3];
 
-            angles[0] = triangle
+            angles[0] = triangle.a.AngleTo(triangle.b);
         }
     }
 

@@ -30,16 +30,27 @@ namespace Aufgabe1
         public MainWindow()
         {
             string root = "../../../../Examples/Aufgabe1/";
-            map = new Map(File.ReadAllLines(root + "lisarennt5.txt"));
-            
+            map = new Map(File.ReadAllLines(root + "lisarennt3.txt"));
+
             /**
-            map = new Map(new Polygon[] 
+            map = new Map(new Polygon[]
+                {
+                    new Polygon(new Vector[] {new Vector(50, 50), new Vector(100, 50), new Vector(100,100), new Vector(50, 100), }),
+                    new Polygon(new Vector[] {new Vector(70, 150), new Vector(120, 150), new Vector(120,200), new Vector(70, 200), }),
+                    new Polygon(new Vector[] {new Vector(50, 250), new Vector(100, 250), new Vector(100,300), new Vector(50, 300), }),
+                },
+                new Vector[] { new Vector(0, 0), new Vector(0, 1000000) },
+                new Vector(50, 150),
+                30, 15);
+            /**/
+            /**
+            map = new Map(new Polygon[]
                 {
                     new Polygon(new Vector[] {new Vector(50, 50), new Vector(50, 100), new Vector(100, 100), new Vector(100, 50), }),
                     new Polygon(new Vector[] {new Vector(150, 50), new Vector(150, 100), new Vector(200, 100), new Vector(200, 50), }),
-                }, 
-                new Vector[] { new Vector(0, 0), new Vector(0, 1000000) }, 
-                new Vector(50, 150), 
+                },
+                new Vector[] { new Vector(0, 0), new Vector(0, 1000000) },
+                new Vector(50, 150),
                 30, 15);
             /**/
 
@@ -84,14 +95,14 @@ namespace Aufgabe1
         private void Navmap_Loaded(object sender, RoutedEventArgs e) => Draw();
         private void Navmap_Move(object sender, RoutedEventArgs e) => Draw();
 
-        private void Draw() => DrawVisibilityPolygonVertex();
+        private void Draw() => DrawVisibilityPolygon();
 
         private void DrawVisibilityPolygon()
         {
             Point mousePositionPoint = Mouse.GetPosition(Navmap);
-            Vector mousePosition = new Vector(mousePositionPoint.X, -mousePositionPoint.Y);
+            Vector mousePosition = new Vector(469, 22);//new Vector(mousePositionPoint.X, -mousePositionPoint.Y);
 
-            DrawLines(map.GenerateVisibilityPolygon(mousePosition, true, out _, out var debug).Select(x => (mousePosition, x.vector)), debug);
+            DrawLines(map.GenerateVisibilityPolygon(mousePosition, true, out _, out var debug, mousePositionPoint.X).Select(x => (mousePosition, x.vector)), debug);
         }
         private void DrawVisibilityPolygonVertex()
         {
