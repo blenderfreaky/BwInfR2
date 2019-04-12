@@ -22,6 +22,9 @@ namespace MaterialDesign2.Controls
         private Point origin;
         private Point start;
 
+        public TranslateTransform translateTransform => GetTranslateTransform(child);
+        public ScaleTransform scaleTransform => GetScaleTransform(child);
+
         private TranslateTransform GetTranslateTransform(UIElement element)
         {
             return (TranslateTransform)((TransformGroup)element.RenderTransform).Children.First(tr => tr is TranslateTransform);
