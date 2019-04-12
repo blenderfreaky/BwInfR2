@@ -104,9 +104,13 @@ namespace Aufgabe1_API
                     Vector inter = dist * dir + origin;
                     Vector aDir = (a.vector - a.Next.vector).Normalize();
                     Vector bDir = (b.vector - b.Next.vector).Normalize();
+                    /*return (GetRemoving() ? -1 : 1) *
+                        aDir.Dot(dir)
+                        .CompareTo(
+                        bDir.Dot(dir));*/
                     Vector aRight = MathHelper.GetAngleSide(aDir.Angle(), GetAngle()) * aDir;
                     Vector bRight = MathHelper.GetAngleSide(bDir.Angle(), GetAngle()) * bDir;
-                    return 
+                    return -(GetRemoving() ? -1 : 1) *
                         aRight.Dot(dir)
                         .CompareTo(
                         bRight.Dot(dir));
