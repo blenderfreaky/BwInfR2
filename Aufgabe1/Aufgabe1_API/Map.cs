@@ -87,46 +87,11 @@ namespace Aufgabe1_API
             {
                 if (ReferenceEquals(a, b) || a == b) return 0;
 
-                double angle = GetAngle();
-
-                int comp =
-                    CalculateDistance(a, origin, angle)
+                double angleDiff = GetAngle() + (GetRemoving() ? -1E-15 : 1E-15); //Anything < 1E-15 doesn't work
+                return
+                    CalculateDistance(a, origin, angleDiff)
                     .CompareTo(
-                    CalculateDistance(b, origin, angle));
-
-                //if (comp == 0)
-                {
-                    double angleDiff = angle + (GetRemoving() ? -1 : 1)*1E-10;// GetDiff() / 2d;
-                    return
-                        CalculateDistance(a, origin, angleDiff)
-                        .CompareTo(
-                        CalculateDistance(b, origin, angleDiff));
-                        
-                    /*Vector aLeftRotated = new Vector(angles[a] - angle) * origin.Distance(a.vector);
-                    Vector aRightRotated = new Vector(angles[a.Next] - angle) * origin.Distance(a.Next.vector);
-                    if (aLeftRotated.y > aRightRotated.y) (aLeftRotated, aRightRotated) = (aRightRotated, aLeftRotated);
-
-                    Vector bLeftRotated = new Vector(angles[b] - angle) * origin.Distance(b.vector);
-                    Vector bRightRotated = new Vector(angles[b.Next] - angle) * origin.Distance(b.Next.vector);
-                    if (bLeftRotated.y > bRightRotated.y) (bLeftRotated, bRightRotated) = (bRightRotated, bLeftRotated);
-
-                    double aRise = (aRightRotated - aLeftRotated).Let(dir => dir.y / dir.x);
-                    double bRise = (bRightRotated - bLeftRotated).Let(dir => dir.y / dir.x);
-
-                    return aRise.CompareTo(bRise) * (aLeftRotated.y == 0 || bLeftRotated.y == 0 ? 1 : -1);*/
-                }
-                /*if (comp == 0)
-                {
-                    Vector aDir = a.Next.vector - a.vector;
-                    Vector bDir = b.Next.vector - b.vector;
-
-                    aDir *= MathHelper.GetAngleSide(aDir.Angle(), angle);
-                    bDir *= MathHelper.GetAngleSide(bDir.Angle(), angle);
-                    
-                    side = angles[a] == angle ?
-                }*/
-
-                return comp;
+                    CalculateDistance(b, origin, angleDiff));
             });
             SortedSet<Vertex> intersections = new SortedSet<Vertex>(comparer);
             //List<Vertex> intersections = new List<Vertex>();
