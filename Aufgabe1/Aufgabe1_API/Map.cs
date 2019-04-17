@@ -85,46 +85,45 @@ namespace Aufgabe1_API
             // Edges are kept as the vertex with the lower index of the two defining vertices
             IComparer<Vertex> comparer = Comparer<Vertex>.Create((a, b) =>
             {
-                if (ReferenceEquals(a, b)) return 0;
+                if (ReferenceEquals(a, b) || a == b) return 0;
 
                 double angle = GetAngle();
-                double diff = Math.Min(Math.Abs(angles[a] - angles[a.Next]), Math.Abs(angles[b] - angles[b.Next]));
-                //double angleDiff = GetAngle() + (GetRemoving() ? -1 : 1) * Math.PI/32;
-                //double angleDiff = GetAngle() - (GetRemoving() ? -1 : 1) * GetDiff() / 2;
-                double angleDiff = GetAngle() + diff / 2;
-                //double angleDiff = GetAngle() + diff / 2;
-
-                int comp = 
-                    CalculateDistance(a, origin, angleDiff)
-                    .CompareTo(
-                    CalculateDistance(b, origin, angleDiff));
-                
-               /* if (comp == 0)
-                    comp =
-                    CalculateDistance(a, origin, angleDiff)
-                    .CompareTo(
-                    CalculateDistance(b, origin, angleDiff));*/
-
-                /*double dist = CalculateDistance(a, origin, angle);
 
                 int comp =
-                    dist
+                    CalculateDistance(a, origin, angle)
                     .CompareTo(
                     CalculateDistance(b, origin, angle));
-                
-                if (comp == 0)
-                {
-                    Vector dir = new Vector(angle);
-                    //Vector inter = dist * dir + origin;
-                    Vector aDir = (a.vector - a.Next.vector).Normalize();
-                    Vector bDir = (b.vector - b.Next.vector).Normalize();
 
-                    Vector aRight = MathHelper.GetAngleSide(aDir.Angle(), angle) * aDir;
-                    Vector bRight = MathHelper.GetAngleSide(bDir.Angle(), angle) * bDir;
-                    return -(GetRemoving() ? -1 : 1) *
-                        aRight.Dot(dir)
+                //if (comp == 0)
+                {
+                    double angleDiff = angle + (GetRemoving() ? -1 : 1)*1E-10;// GetDiff() / 2d;
+                    return
+                        CalculateDistance(a, origin, angleDiff)
                         .CompareTo(
-                        bRight.Dot(dir));
+                        CalculateDistance(b, origin, angleDiff));
+                        
+                    /*Vector aLeftRotated = new Vector(angles[a] - angle) * origin.Distance(a.vector);
+                    Vector aRightRotated = new Vector(angles[a.Next] - angle) * origin.Distance(a.Next.vector);
+                    if (aLeftRotated.y > aRightRotated.y) (aLeftRotated, aRightRotated) = (aRightRotated, aLeftRotated);
+
+                    Vector bLeftRotated = new Vector(angles[b] - angle) * origin.Distance(b.vector);
+                    Vector bRightRotated = new Vector(angles[b.Next] - angle) * origin.Distance(b.Next.vector);
+                    if (bLeftRotated.y > bRightRotated.y) (bLeftRotated, bRightRotated) = (bRightRotated, bLeftRotated);
+
+                    double aRise = (aRightRotated - aLeftRotated).Let(dir => dir.y / dir.x);
+                    double bRise = (bRightRotated - bLeftRotated).Let(dir => dir.y / dir.x);
+
+                    return aRise.CompareTo(bRise) * (aLeftRotated.y == 0 || bLeftRotated.y == 0 ? 1 : -1);*/
+                }
+                /*if (comp == 0)
+                {
+                    Vector aDir = a.Next.vector - a.vector;
+                    Vector bDir = b.Next.vector - b.vector;
+
+                    aDir *= MathHelper.GetAngleSide(aDir.Angle(), angle);
+                    bDir *= MathHelper.GetAngleSide(bDir.Angle(), angle);
+                    
+                    side = angles[a] == angle ?
                 }*/
 
                 return comp;
@@ -159,7 +158,7 @@ namespace Aufgabe1_API
                 }
 
                 if (intersections.Count != 0) {
-                    //return !intersections.Any(x => Vector.IntersectingLines(origin, target.vector, x.vector, x.Next.vector));
+                    return !intersections.Any(x => Vector.IntersectingLines(origin, target.vector, x.vector, x.Next.vector));
                     return intersections.First().Let(x => !Vector.IntersectingLines(origin, target.vector, x.vector, x.Next.vector));
                 }
 
@@ -173,50 +172,30 @@ namespace Aufgabe1_API
             //debugOut.Add((origin, origin + dir * 9999));
 
             List<Vertex> delta = new List<Vertex>();
+            List<Vertex> removed = new List<Vertex>();
+            List<Vertex> buffer = new List<Vertex>();
 
             foreach ((Vertex vert, double currentAngle) in angles.OrderBy(x => x.Value))
             {
+                if (vert == originVert) continue;
+
                 double prevAngle = angle;
-                diff = prevAngle - currentAngle;
                 angle = currentAngle;
 
                 //if (MathHelper.GetAngleSide(edge, currentAngle) <= 0) debugOut.Add((vert.vector - new Vector(0), vert.vector + new Vector(0)));
                 //debugOut.Add((vert.vector, origin));
 
-                if (!(vert.polygon is null))
-                {
-                    removing = true;
-
-                    Vertex previous = vert.Previous;
-                    if (previous.vector == origin || Vector.Orientation(previous.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise)
-                    {
-                        delta.Add(previous);
-                    }
-                    else
-                    {
-                        intersections.Remove(previous);
-                    }
-
-                    Vertex next = vert.Next;
-                    if (vert.Next.vector == origin || Vector.Orientation(vert.Next.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise)
-                    {
-                        delta.Add(vert);
-                    }
-                    else
-                    {
-                        intersections.Add(vert);
-                    }
-                }
-
-                if (IsVisible(vert)) visibilityGraph.Add(vert);
-
                 if (prevAngle != currentAngle)
                 {
+                    diff = currentAngle -prevAngle;
                     removing = false;
-                    diff = -diff;
+
+                    visibilityGraph.AddRange(buffer.Where(IsVisible));
+                    buffer.Clear();
 
                     delta.ForEach(x => intersections.Add(x));
                     delta.Clear();
+                    removed.Clear();
 
                     if (prevAngle < edge && edge <= currentAngle)
                     {
@@ -232,6 +211,36 @@ namespace Aufgabe1_API
                             .Select(x =>
                                 CalculateDistance(x, origin, edge)
                                 .Let(y => (origin + dir * y - dir * ++c * s, origin + dir * y + dir * ++c * s))));
+                    }
+                }
+
+                buffer.Add(vert);
+
+                if (!(vert.polygon is null))
+                {
+                    removing = true;
+                    diff = -diff;
+
+                    Vertex previous = vert.Previous;
+                    if (Vector.Orientation(previous.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise)
+                    {
+                        intersections.Remove(previous);
+                        removed.Add(previous);
+                    }
+                    else
+                    {
+                        delta.Add(previous);
+                    }
+
+                    Vertex next = vert.Next;
+                    if (Vector.Orientation(vert.Next.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise)
+                    {
+                        intersections.Remove(vert);
+                        removed.Add(vert);
+                    }
+                    else
+                    {
+                        delta.Add(vert);
                     }
                 }
             }

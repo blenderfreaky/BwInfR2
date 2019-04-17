@@ -70,7 +70,7 @@ namespace Aufgabe1_API
             ? a.vector == b.vector 
             : a.polygon == b.polygon && a.index == b.index;
         public static bool operator !=(Vertex a, Vertex b) => !(a == b);
-        public override bool Equals(object obj) => obj is Vertex segment && polygon == segment.polygon && index == segment.index;
+        public override bool Equals(object obj) => obj is Vertex segment && this == segment;
         public override int GetHashCode()
         {
             var hashCode = -2056935238;
