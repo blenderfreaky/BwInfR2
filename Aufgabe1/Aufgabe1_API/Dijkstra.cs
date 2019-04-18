@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Aufgabe1_API
 {
@@ -52,7 +49,7 @@ namespace Aufgabe1_API
         }
 
         public static double GetPathLength(Vertex start, Vertex end, Dictionary<Vertex, Vertex> heuristic, Dictionary<Vertex, Dictionary<Vertex, double>> visitedNodes)
-        { 
+        {
             double length = 0;
             for (Vertex current = end, next = heuristic[end]; current != start; current = next, next = heuristic[current]) length += visitedNodes[next][current];
             return length;

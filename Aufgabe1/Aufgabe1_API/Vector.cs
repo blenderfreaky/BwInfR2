@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Aufgabe1_API.Vector;
 
 namespace Aufgabe1_API
 {

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Aufgabe1_API
 {
@@ -31,6 +29,29 @@ namespace Aufgabe1_API
                 if (elemComparable.CompareTo(min.comparable) < 0) min = (elemValue, elemComparable);
             }
             return min;
+        }
+        public static (T1 value, T2 comparable) MaxValue<T1, T2>(this IEnumerable<T1> enumerable, Func<T1, T2> selector) where T2 : IComparable<T2>
+        {
+            T1 first = enumerable.First();
+            (T1 value, T2 comparable) max = (first, selector(first));
+            foreach (T1 elemValue in enumerable)
+            {
+                T2 elemComparable = selector(elemValue);
+                if (elemComparable.CompareTo(max.comparable) > 0) max = (elemValue, elemComparable);
+            }
+            return max;
+        }
+        public static T MinValue<T>(this IEnumerable<T> enumerable, IComparer<T> comparer)
+        {
+            T min = enumerable.First();
+            foreach (T elem in enumerable) if (comparer.Compare(elem, min) < 0) min = elem;
+            return min;
+        }
+        public static T MaxValue<T>(this IEnumerable<T> enumerable, IComparer<T> comparer)
+        {
+            T max = enumerable.First();
+            foreach (T elem in enumerable) if (comparer.Compare(elem, max) > 0) max = elem;
+            return max;
         }
         public static T2 Let<T1, T2>(this T1 obj, Func<T1, T2> func) => func(obj);
         public static void Let<T>(this T obj, Action<T> action) => action(obj);

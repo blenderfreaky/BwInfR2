@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Aufgabe1_API
 {
@@ -38,10 +34,10 @@ namespace Aufgabe1_API
 
         public Vertex Init()
         {
-            isConvex = Vector.Orientation(polygon[index - 1].vector, vector, polygon[index + 1].vector) == Vector.VectorOrder.Clockwise;
+            isConvex = Vector.Orientation(Previous.vector, vector, Next.vector) == Vector.VectorOrder.Clockwise;
             normal = isConvex
-                   ? ((polygon[index - 1].vector - vector).Normalize() + (polygon[index + 1].vector - vector).Normalize()).Normalize()
-                   : -((polygon[index - 1].vector - vector).Normalize() + (polygon[index + 1].vector - vector).Normalize()).Normalize();
+                    ? ((Previous.vector - vector).Normalize() + (Next.vector - vector).Normalize())
+                    : -((Previous.vector - vector).Normalize() + (Next.vector - vector).Normalize());
             return this;
         }
 
@@ -54,7 +50,7 @@ namespace Aufgabe1_API
         public bool BehindNeighbors(Vector other)
         {
             bool enclosed = Vector.Orientation(vector, Previous.vector, other) == Vector.VectorOrder.Counterclockwise
-                          ^ Vector.Orientation(vector, Next.vector,     other) == Vector.VectorOrder.Counterclockwise;
+                          ^ Vector.Orientation(vector, Next.vector, other) == Vector.VectorOrder.Counterclockwise;
             double dot = Vector.Dot(other - vector, normal);
 
             return isConvex
@@ -63,11 +59,11 @@ namespace Aufgabe1_API
         }
 
         public double Dot(Vertex other) => (Next.vector - vector).Normalize().Dot((other.Next.vector - other.vector).Normalize());
-        public double Dot(Vector start, Vector end) => (Next.vector - vector).Normalize().Dot((end-start).Normalize());
+        public double Dot(Vector start, Vector end) => (Next.vector - vector).Normalize().Dot((end - start).Normalize());
 
-        public static bool operator ==(Vertex a, Vertex b) => 
-              a.polygon == null || b.polygon == null 
-            ? a.vector == b.vector 
+        public static bool operator ==(Vertex a, Vertex b) =>
+              a.polygon == null || b.polygon == null
+            ? a.vector == b.vector
             : a.polygon == b.polygon && a.index == b.index;
         public static bool operator !=(Vertex a, Vertex b) => !(a == b);
         public override bool Equals(object obj) => obj is Vertex segment && this == segment;

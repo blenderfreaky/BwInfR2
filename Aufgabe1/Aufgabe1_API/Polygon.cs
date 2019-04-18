@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,24 +18,18 @@ namespace Aufgabe1_API
 
         protected bool FixDirection()
         {
-            Vertex max = vertices[0];
+            /*Vertex max = vertices[0];
 
             foreach (Vertex polygonVertex in vertices)
             {
                 if (max.vector.y > polygonVertex.vector.y
-                 && max.vector.x <= polygonVertex.vector.x)
+                    && max.vector.x <= polygonVertex.vector.x)
                 {
                     max = polygonVertex;
                 }
-            }
+            }*/
 
-            /*Vector previous = max.Previous.vector;
-            Vector center = max.vector;
-            Vector next = max.Next.vector;
-
-            double direction =
-                (center.x * next.y + previous.x * center.y + previous.y * next.x)
-              - (previous.y * center.x + center.y * next.x + previous.x * next.y);*/
+            Vertex max = vertices.MaxValue(Comparer<Vertex>.Create((a, b) => a.vector.y > b.vector.y && a.vector.x <= b.vector.x ? 1 : -1));
 
             bool flipRequired = Vector.Orientation(max.Previous.vector, max.vector, max.Next.vector) == Vector.VectorOrder.Clockwise;
 

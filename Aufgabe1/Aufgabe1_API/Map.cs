@@ -70,74 +70,86 @@ namespace Aufgabe1_API
             List<Vertex> visibilityGraph = new List<Vertex>();
             List<Vertex> allPolygonVertices = this.allPolygonVertices.Where(x => x != originVert).ToList();
 
-            double angle = 0, diff = 0;
-            bool removing = false;
-            double GetAngle() => angle;
-            double GetDiff() => diff;
-            bool GetRemoving() => removing;
-
             endpoints = GetEndpoints(origin).Select(x => new Vertex(x)).ToList();
             Dictionary<Vertex, double> angles =
                 allPolygonVertices
                 .Concat(endpoints)
                 .ToDictionary(x => x, x => x.vector.Angle(origin));
 
+            double angle = 0;
+            bool removing = false;
+
+            double GetAngle() => angle;
+            bool GetRemoving() => removing;
+
             // Edges are kept as the vertex with the lower index of the two defining vertices
             IComparer<Vertex> comparer = Comparer<Vertex>.Create((a, b) =>
             {
                 if (ReferenceEquals(a, b) || a == b) return 0;
 
-                double angleDiff = GetAngle() + (GetRemoving() ? -1E-15 : 1E-15); //Anything < 1E-15 doesn't work
+                double angleDiff = GetAngle() + (GetRemoving() ? -1E-15 : 1E-15); // Anything < 1E-15 doesn't work
                 return
                     CalculateDistance(a, origin, angleDiff)
                     .CompareTo(
                     CalculateDistance(b, origin, angleDiff));
             });
             SortedSet<Vertex> intersections = new SortedSet<Vertex>(comparer);
-            //List<Vertex> intersections = new List<Vertex>();
 
             foreach (Vertex polygonVertex in allPolygonVertices)
             {
-                Vector a = polygonVertex.vector - origin;
-                Vector b = polygonVertex.Next.vector - origin;
-
-                if (a.y * b.y < 0 && CalculateDistance(polygonVertex, origin, 0) >= 0)
+                if ((polygonVertex.Next.vector - origin).y * (polygonVertex.vector - origin).y < 0
+                 && CalculateDistance(polygonVertex, origin, 0) >= 0)
                 {
                     intersections.Add(polygonVertex);
                 }
             }
 
+            List<(double min, double max)> left = new List<(double, double)>();
+            List<(double min, double max)> right = new List<(double, double)>();
+
+            List<(double min, double max)> GetLeft() => left;
+            List<(double min, double max)> GetRight() => right;
+
             bool IsVisible(Vertex target)
             {
-                if (!(originVert.polygon is null))
-                {
-                    if (originVert.IsNeighbor(target)) return true;
-                    if (reduced && originVert.BehindNeighbors(2 * origin - target.vector)) return false;
-                    if (originVert.BehindNeighbors(target.vector)) return false;
-                }
                 if (!(target.polygon is null))
                 {
                     if (target.BehindNeighbors(origin)) return false;
                     if (reduced && target.BehindNeighbors(2 * target.vector - origin)) return false;
-                    if (target.polygon.Intersects(origin, target.vector)) return false;
+                }
+                if (!(originVert.polygon is null))
+                {
+                    if (reduced && originVert.BehindNeighbors(2 * origin - target.vector)) return false;
+                    if (originVert.IsNeighbor(target)) return true; // Neighbours are not always visible in a reduced graph
+                    if (originVert.BehindNeighbors(target.vector)) return false;
                 }
 
-                if (intersections.Count != 0) {
-                    return !intersections.Any(x => Vector.IntersectingLines(origin, target.vector, x.vector, x.Next.vector));
-                    return intersections.First().Let(x => !Vector.IntersectingLines(origin, target.vector, x.vector, x.Next.vector));
-                }
+                if (intersections.Count != 0 &&
+                    intersections.First().Let(x => Vector.IntersectingLines(origin, target.vector, x.vector, x.Next.vector))) return false;
+
+                var furthestDistance =
+                    GetLeft()
+                    .SelectMany(x => GetRight()
+                        .Where(y =>
+                            (x.min <= y.min && y.min <= x.max)
+                         || (x.min <= y.max && y.max <= x.max)
+                        ) // Only take intersections
+                        .Select(y => Math.Max(x.min, y.min))
+                    )
+                    .Let(blocked => blocked.Any() ? blocked.Min() : double.PositiveInfinity);
+
+                if (origin.Distance(target.vector) > furthestDistance) return false;
 
                 return true;
             }
 
-            double edge = Math.PI * 0.5;// (n++/2)*0.1d;
-            edge = MathHelper.ModuloAngle(xM / 100d);
-            Vector dir = new Vector(edge);
-            Vector dirCrossed = new Vector(dir.y, -dir.x);
+            //double edge = Math.PI * 0.5;// (n++/2)*0.1d;
+            //edge = MathHelper.ModuloAngle(xM / 100d);
+            //Vector dir = new Vector(edge);
+            //Vector dirCrossed = new Vector(dir.y, -dir.x);
             //debugOut.Add((origin, origin + dir * 9999));
 
             List<Vertex> delta = new List<Vertex>();
-            List<Vertex> removed = new List<Vertex>();
             List<Vertex> buffer = new List<Vertex>();
 
             foreach ((Vertex vert, double currentAngle) in angles.OrderBy(x => x.Value))
@@ -152,7 +164,6 @@ namespace Aufgabe1_API
 
                 if (prevAngle != currentAngle)
                 {
-                    diff = currentAngle -prevAngle;
                     removing = false;
 
                     visibilityGraph.AddRange(buffer.Where(IsVisible));
@@ -160,9 +171,11 @@ namespace Aufgabe1_API
 
                     delta.ForEach(x => intersections.Add(x));
                     delta.Clear();
-                    removed.Clear();
 
-                    if (prevAngle < edge && edge <= currentAngle)
+                    left.Clear();
+                    right.Clear();
+
+                    /*if (prevAngle < edge && edge <= currentAngle)
                     {
                         debugOut.AddRange(intersections.Select(x => (x.vector, x.Next.vector)));
                         int c = 0;
@@ -176,7 +189,7 @@ namespace Aufgabe1_API
                             .Select(x =>
                                 CalculateDistance(x, origin, edge)
                                 .Let(y => (origin + dir * y - dir * ++c * s, origin + dir * y + dir * ++c * s))));
-                    }
+                    }*/
                 }
 
                 buffer.Add(vert);
@@ -184,28 +197,41 @@ namespace Aufgabe1_API
                 if (!(vert.polygon is null))
                 {
                     removing = true;
-                    diff = -diff;
 
                     Vertex previous = vert.Previous;
                     if (Vector.Orientation(previous.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise)
                     {
                         intersections.Remove(previous);
-                        removed.Add(previous);
+                        right.Add(previous == originVert || currentAngle == angles[previous]
+                               ? (origin.DistanceSquared(vert.vector), origin.DistanceSquared(previous.vector))
+                                 .Let(x => x.Item1 < x.Item2 ? x : (x.Item2, x.Item1)) // Squaring is cheaper than Sqrt
+                               : origin.DistanceSquared(vert.vector).Let(x => (x, x)));
                     }
                     else
                     {
                         delta.Add(previous);
+                        left.Add(previous == originVert || currentAngle == angles[previous]
+                               ? (origin.DistanceSquared(vert.vector), origin.DistanceSquared(previous.vector))
+                                 .Let(x => x.Item1 < x.Item2 ? x : (x.Item2, x.Item1))
+                               : origin.DistanceSquared(vert.vector).Let(x => (x, x)));
                     }
 
                     Vertex next = vert.Next;
-                    if (Vector.Orientation(vert.Next.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise)
+                    if (next != originVert || Vector.Orientation(next.vector, vert.vector, origin) != Vector.VectorOrder.Clockwise)
                     {
                         intersections.Remove(vert);
-                        removed.Add(vert);
+                        right.Add(next == originVert || currentAngle == angles[next]
+                               ? (origin.DistanceSquared(vert.vector), origin.DistanceSquared(next.vector))
+                                 .Let(x => x.Item1 < x.Item2 ? x : (x.Item2, x.Item1))
+                               : origin.DistanceSquared(vert.vector).Let(x => (x, x)));
                     }
                     else
                     {
                         delta.Add(vert);
+                        left.Add(next == originVert || currentAngle == angles[next]
+                            ? (origin.DistanceSquared(vert.vector), origin.DistanceSquared(next.vector))
+                              .Let(x => x.Item1 < x.Item2 ? x : (x.Item2, x.Item1))
+                            : origin.DistanceSquared(vert.vector).Let(x => (x, x)));
                     }
                 }
             }
@@ -242,9 +268,9 @@ namespace Aufgabe1_API
             var debugOut = new List<(Vector, Vector)>();
             var endpointsOut = new List<Vertex>();
 
-            Dictionary<Vertex, Func<Dictionary<Vertex, double>>> graph = 
+            Dictionary<Vertex, Func<Dictionary<Vertex, double>>> graph =
                 allVertices.ToDictionary(x => x, x =>
-                (Func<Dictionary<Vertex, double>>)(() => 
+                (Func<Dictionary<Vertex, double>>)(() =>
                     {
                         var polygon = GenerateVisibilityPolygon(x, reduced, out var newEndpoints, out var newDebug);
                         debugOut.AddRange(newDebug);
@@ -263,7 +289,7 @@ namespace Aufgabe1_API
         {
             var heuristic = GenerateDijkstraHeuristic(true, out var visitedNodes, out var endpoints, out debug);
 
-            Dictionary<Vertex, double> times = endpoints.Where(x => heuristic.ContainsKey(x)).ToDictionary(x => x, 
+            Dictionary<Vertex, double> times = endpoints.Where(x => heuristic.ContainsKey(x)).ToDictionary(x => x,
                 x => Dijkstra.GetPathLength(startingPosition, x, heuristic, visitedNodes) * characterSpeed - GetBusDuration(x.vector) * busSpeed);
 
             return Dijkstra.GetPath(startingPosition, times.MinValue(x => x.Value).value.Key, heuristic);
