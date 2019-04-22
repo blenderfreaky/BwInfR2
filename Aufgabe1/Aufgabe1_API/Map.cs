@@ -119,7 +119,7 @@ namespace Aufgabe1_API
             Vector origin = originVertex.vector;
 
             List<Vertex> visibilityGraph = new List<Vertex>();
-            List<Vertex> allPolygonVertices = this.allPolygonVertices.Where(x => x.vector != origin).ToList();
+            List<Vertex> allPolygonVertices = this.allPolygonVertices.Where(x => !x.vector.Approx(origin, epsilon)).ToList();
 
             endpoints = GetEndpoints(origin).Select(x => new Vertex(x)).ToList();
             Dictionary<Vertex, double> angles =
@@ -147,13 +147,14 @@ namespace Aufgabe1_API
                 {
                     if (a2.Approx(b2, epsilon)) return 0; // Same Lines
                     // a and b are on opposing sides of ray from origin to shared point (current ray in sweep-line algorithm)
-                    if (Vector.OrientationApprox(origin, a1, b2, epsilon) != Vector.OrientationApprox(origin, a1, b1, epsilon)) 
+                    if (Vector.OrientationApprox(origin, a1, b2, epsilon) != Vector.OrientationApprox(origin, a1, a2, epsilon)) 
                     {
+                        // You shouldn't ever get here, but somehow you do
                         throw null;
                     }
 
-                    // Will be the same if a2 is between b2 and origin => b is above a
-                    return Vector.OrientationApprox(a1, a2, b2, epsilon) == Vector.OrientationApprox(a1, a2, origin, epsilon) ? -1 : 1; 
+                    // b2 is on the same side of a as origin => b is below a
+                    return Vector.OrientationApprox(a1, a2, b2, epsilon) == Vector.OrientationApprox(a1, a2, origin, epsilon) ? 1 : -1; 
                 }
                 else
                 {
@@ -186,8 +187,8 @@ namespace Aufgabe1_API
 
             foreach (Vertex polygonVertex in allPolygonVertices)
             {
-                if ((polygonVertex.Next.vector - origin).y * (polygonVertex.vector - origin).y < 0
-                 && CalculateDistance(polygonVertex, origin, 0) >= 0)
+                if ((polygonVertex.Next.vector - origin).y * (polygonVertex.vector - origin).y < -epsilon
+                 && CalculateDistance(polygonVertex, origin, 0) >= epsilon)
                 {
                     intersections.Add(polygonVertex);
                 }
@@ -255,7 +256,7 @@ namespace Aufgabe1_API
 
             void Add(double currentAngle, double nextAngle, Vertex first, Vertex second)
             {
-                if (first == originVertex || second == originVertex) return; // Already handeled by BetweenNeighbours
+                if (first.vector.Approx(origin, epsilon) || second.vector.Approx(origin, epsilon)) return; // Already handeled by BetweenNeighbours
 
                 // Collinear lines aren't intersections, only their position on the ray is used
                 if (Vector.OrientationApprox(origin, first.vector, second.vector, epsilon) != Vector.VectorOrder.Collinear) delta.Add(first);
@@ -266,7 +267,7 @@ namespace Aufgabe1_API
             }
             void Remove(double prevAngle, double currentAngle, Vertex first, Vertex second)
             {
-                if (first == originVertex || second == originVertex) return; // Already handeled by BetweenNeighbours
+                if (first.vector.Approx(origin, epsilon) || second.vector.Approx(origin, epsilon)) return; // Already handeled by BetweenNeighbours
 
                 // Collinear lines aren't intersections, only their position on the ray is used
                 if (Vector.OrientationApprox(origin, first.vector, second.vector, epsilon) != Vector.VectorOrder.Collinear) intersections.Remove(first);
@@ -312,7 +313,7 @@ namespace Aufgabe1_API
                     }
                     //debugOut.Add((origin, origin + edgeVec * 10000));
                 }
-
+                
                 delta.ForEach(x => intersections.Add(x));
                 delta.Clear();
             }

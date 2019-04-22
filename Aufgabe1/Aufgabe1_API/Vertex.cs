@@ -78,5 +78,6 @@ namespace Aufgabe1_API
             hashCode = hashCode * -1521134295 + index.GetHashCode();
             return hashCode;
         }
+        public override string ToString() => $"{vector.ToString()} in {polygon?.ToString()} at {index}";
     }
 }
