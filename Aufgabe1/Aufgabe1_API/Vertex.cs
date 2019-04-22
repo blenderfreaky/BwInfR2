@@ -58,6 +58,9 @@ namespace Aufgabe1_API
                     : enclosed && dot < 0;
         }
 
+        public bool BetweenNeighbors(Vector other) =>
+            !isConvex && (Vector.Orientation(vector, Previous.vector, other) != Vector.Orientation(Next.vector, vector, other));
+
         public double Dot(Vertex other) => (Next.vector - vector).Normalize().Dot((other.Next.vector - other.vector).Normalize());
         public double Dot(Vector start, Vector end) => (Next.vector - vector).Normalize().Dot((end - start).Normalize());
 

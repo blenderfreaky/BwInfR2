@@ -9,9 +9,6 @@
 
 \newcommand{\vb}{v_{Bus}}
 \newcommand{\vl}{v_{Lisa}}
-\newcommand{\te}{t(\theta)}
-\newcommand{\dt}[1]{\frac{d#1}{d\theta}}
-\newcommand{\dte}{\dt{\te}}
 
 \newcommand{\x}{x}
 
@@ -23,51 +20,9 @@
 
 \newcommand{\tf}{t(\f)}
 \newcommand{\df}[1]{\frac{d#1}{d\f}}
-\newcommand{\dtf}{\dt{\tf}}
+\newcommand{\dtf}{\df{\tf}}
 
 \newcommand{\abs}[1]{\lvert #1 \rvert}
-%\newcommand{}{}
-%\newcommand{}{}
-
-\comment{
-\begin{align*}
-\te &= \vl\sqrt{\x^2+(\x\tan\theta)^2}-\vb\x\tan\theta\\
-&= \vl\x\sqrt{1+\tan^2\theta}-\vb\x\tan\theta\\
-&= \vl\x\sqrt{\frac{1}{\cos\theta}}-\vb\x\tan\theta\\
-&= \vl\frac{\x}{\sqrt{\cos\theta}}-\vb\x\tan\theta\\
-\end{align*}
-
-\begin{align*}
-\dte &= \dt{\vl\frac{\x}{\sqrt{\cos\theta}}-\vb\x\tan\theta}\\
-&=\vl\frac{\dt{\x}\sqrt{\cos\theta}-\x\dt{\sqrt{\cos\theta}}}{\sqrt{\cos\theta}^2}-\vb\x\dt{\tan\theta}\\
-&=\vl\frac{-\x}{\sqrt{\cos\theta}^2}\cdot\frac{1}{2\sqrt{\cos\theta}}\cdot\dt{\cos\theta}-\frac{\vb\x}{\cos^2\theta}\\
-&=\vl\frac{\x\sin\theta}{2\cos^{\frac{3}{2}}\theta}-\vb\frac{\x}{\cos^2\theta}\\
-\end{align*}
-
-\begin{align*}
-&&\dte &= 0\\
-\iff&&\vl\frac{\x\sin\theta}{2\cos^{\frac{3}{2}}\theta}-\vb\frac{\x}{\cos^2\theta} &= 0\\
-\iff&&\vl\frac{\x\sin\theta}{2\cos^{\frac{3}{2}}\theta} &= \vb\frac{\x}{\cos^2\theta}\\
-\iff&&\vl\frac{\sin\theta}{\cos^{\frac{3}{2}}\theta} &= \vb\frac{2}{\cos^2\theta}\\
-\iff&&\sin\theta\sqrt{\cos\theta} &= 2\frac{\vb}{\vl}\\
-\iff&&\frac{\sin\theta\cos\theta}{\sqrt{\cos\theta}} &= 2\frac{\vb}{\vl}\\
-\iff&&\frac{\sin2\theta}{\sqrt{\cos\theta}} &= 4\frac{\vb}{\vl}\\
-\end{align*}
-}
-
-\begin{align*}
-&&n &= senk(norm(l-c)-norm(r-c)) \\
-&&  &= senk((l-c)/len(l-c)-(r-c)/len(r-c)) \\
-&&  &= senk((l-c)/\sqrt((l_x-c_x)^2+(l_y-c_y)^2)-(r-c)/\sqrt((r_x-c_x)^2+(r_y-c_y)^2)) \\
-&&n_x &=  \frac{l_y-c_y}{\sqrt{(l_x-c_x)^2+(l_y-c_y)^2}}
-        - \frac{r_y-c_y}{\sqrt{(r_x-c_x)^2+(r_y-c_y)^2}} \\
-&&n_x &=  \frac{\sqrt{(r_x-c_x)^2+(r_y-c_y)^2}\cdot(l_y-c_y)}{\sqrt{(r_x-c_x)^2+(r_y-c_y)^2}\cdot\sqrt{(l_x-c_x)^2+(l_y-c_y)^2}}
-        - \frac{\sqrt{(l_x-c_x)^2+(l_y-c_y)^2}\cdot(r_y-c_y)}{\sqrt{(l_x-c_x)^2+(l_y-c_y)^2}\cdot\sqrt{(r_x-c_x)^2+(r_y-c_y)^2}} \\
-&&n_x &=  \frac{\sqrt{(r_x-c_x)^2+(r_y-c_y)^2}\cdot(l_y-c_y) - \sqrt{(l_x-c_x)^2+(l_y-c_y)^2}\cdot(r_y-c_y)}{\sqrt{(l_x-c_x)^2+(l_y-c_y)^2}\cdot\sqrt{(r_x-c_x)^2+(r_y-c_y)^2}} \\
-&&&\\
-&&n_y &= -\frac{l_x-c_x}{\sqrt{(l_x-c_x)^2+(l_y-c_y)^2}} 
-        + \frac{r_x-c_x}{\sqrt{(r_x-c_x)^2+(r_y-c_y)^2}} \\
-\end{align*}
 
 \newpage
 

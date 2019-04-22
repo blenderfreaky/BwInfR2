@@ -6,13 +6,13 @@
         xmlns:local="clr-namespace:Aufgabe1_GUI"
         xmlns:material="clr-namespace:MaterialDesign2.Controls;assembly=MaterialDesign2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="587" Width="881">
     <Grid>
-        <material:PanBorder>
-            <Grid x:Name="Off" Background="White" MouseMove="Draw">
+        <material:PanBorder Background="White">
+            <Grid x:Name="Off" Background="White" MouseMove="ReDraw">
                 <Grid x:Name="Back">
-                    <Canvas x:Name="Polygons" Margin="0" Loaded="Polygons_Loaded"/>
-                    <Canvas x:Name="Buspath" Margin="0" Loaded="Buspath_Loaded"/>
+                    <Canvas x:Name="Polygons" Margin="0" Loaded="DrawPolygons"/>
+                    <Canvas x:Name="Buspath" Margin="0" Loaded="DrawBuspath"/>
                     <Canvas x:Name="Navmap" Margin="0" Loaded="Draw"/>
                     <Canvas x:Name="Debugging" Margin="0" Loaded="Draw"/>
                 </Grid>
@@ -27,7 +27,7 @@
                         <Line StrokeThickness="2" Margin="0" Stroke="White" X1="6" X2="24" Y1="22" Y2="22" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     </Grid>
                 </material:MaterialButton>
-                <StackPanel x:Name="AdvancedOptions" Orientation="Vertical" Margin="0,0,0,0">
+                <StackPanel x:Name="AdvancedOptions" Orientation="Vertical" Margin="0,0,0,0" CanVerticallyScroll="True">
                     <material:MaterialButton Click="CloseAdvanced_Click" Width="30" Height="30" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="Black" HorizontalAlignment="Left">
                         <Grid Margin="0">
                             <Line StrokeThickness="2" Margin="0" Stroke="White" X1="6" X2="24" Y1= "8" Y2= "8" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
@@ -35,6 +35,12 @@
                             <Line StrokeThickness="2" Margin="0" Stroke="White" X1="6" X2="24" Y1="22" Y2="22" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         </Grid>
                     </material:MaterialButton>
+                    <Border Background="#FFFF8383" Margin="3" CornerRadius="5">
+                        <StackPanel>
+                            <TextBlock Text="FILE" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="Black" FontWeight="Bold"/>
+                            <material:MaterialButton x:Name="open" Text="Open" Click="Open_Click" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
+                        </StackPanel>
+                    </Border>
                     <Border Background="#FFFF8383" Margin="3" CornerRadius="5">
                         <StackPanel>
                             <TextBlock Text="RESULTS" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="Black" FontWeight="Bold"/>
@@ -51,6 +57,13 @@
                             <material:MaterialButton x:Name="normals" Text="Normals" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
                             <material:MaterialButton x:Name="convexity" Text="Convexity" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
                             <material:MaterialButton x:Name="direction" Text="Direction" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#FFFF8383" Margin="3" CornerRadius="5">
+                        <StackPanel>
+                            <TextBlock Text="SETTINGS" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="Black" FontWeight="Bold"/>
+                            <material:MaterialTextBoxFilled x:Name="characterSpeed" NumberPane="RealPlus" Label="Lisas Speed" NumberValue="15" TextChanged="CharacterSpeed_TextChanged" Margin="3" Background="#FFE6E6E6" Width="180" Height="50" Foreground="White" FontSize="25" LabelFontSize="25" LeftMinWidth="20" ActiveLabelFontSize="15"/>
+                            <material:MaterialTextBoxFilled x:Name="busSpeed" NumberPane="RealPlus" Label="Bus Speed" NumberValue="30" TextChanged="BusSpeed_TextChanged" Margin="3" Background="#FFE6E6E6" Width="180" Height="50" Foreground="White" FontSize="25" LabelFontSize="25" LeftMinWidth="20" ActiveLabelFontSize="15"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>

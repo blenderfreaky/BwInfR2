@@ -14,6 +14,18 @@ namespace Aufgabe1_API
         }
         public static int GetAngleSide(double angle1, double angle2) => ModuloAngle(angle2 - angle1) == 0 ? 0 : ModuloAngle(angle2 - angle1).CompareTo(Math.PI);
         public static double Clamp(double value, double min, double max) => value < min ? min : value > max ? max : value;
+
+        /// <summary>
+        /// Replaces 0 with different value
+        /// </summary>
+        /// <param name="input">The number to potentially replace</param>
+        /// <param name="ifZero">Function returning the replacing value</param>
+        /// <returns>Returns input, if input != 0, if input == 0, it returns the return value of ifZero</returns>
+        public static int IfZero(this int input, Func<int> ifZero) => input == 0 ? ifZero() : input;
+
+        public static bool Approx(this double first, double second, double epsilon) => Math.Abs(first - second) < epsilon;
+        public static bool Approx(this Vector first, Vector second, double epsilonSquared) => first.DistanceSquared(second) < epsilonSquared;
+        public static int CompareToApprox(this double first, double second, double epsilon) => Approx(first, second, epsilon) ? 0 : first.CompareTo(second);
     }
 
     public static class GeneralHelper

@@ -37,11 +37,11 @@ namespace Aufgabe1_API
         public double Dot(Vector other) => x * other.x + y * other.y;
         public static double Dot(Vector vec, Vector other) => vec.x * other.x + vec.y * other.y;
 
-        public double Determinant(Vector other) => x * other.y - y * other.x;
-        public static double Determinant(Vector vec, Vector other) => vec.x * other.y - vec.y * other.x;
+        public double WedgeProduct(Vector other) => x * other.y - y * other.x;
+        public static double WedgeProduct(Vector vec, Vector other) => vec.x * other.y - vec.y * other.x;
 
-        public double AngleTo(Vector other) => MathHelper.ModuloAngle(-Math.Atan2(Determinant(other), Dot(other)));
-        public static double AngleTo(Vector vec, Vector other) => MathHelper.ModuloAngle(-Math.Atan2(Determinant(vec, other), Dot(vec, other)));
+        public double AngleTo(Vector other) => MathHelper.ModuloAngle(-Math.Atan2(WedgeProduct(other), Dot(other)));
+        public static double AngleTo(Vector vec, Vector other) => MathHelper.ModuloAngle(-Math.Atan2(WedgeProduct(vec, other), Dot(vec, other)));
 
         public Vector Normalize() => x == 0 && y == 0 ? this : this / Magnitude();
         public static Vector Normalize(Vector vec) => vec.x == 0 && vec.y == 0 ? vec : vec / vec.Magnitude();
@@ -55,11 +55,10 @@ namespace Aufgabe1_API
         public static Vector operator /(Vector a, Vector b) => new Vector(a.x / b.x, a.y / b.y);
         public static Vector operator /(Vector a, double b) => new Vector(a.x / b, a.y / b);
 
-        #region Intersection
-        //Algorithm from https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
+        // Algorithm from https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
         public enum VectorOrder : int
         {
-            Colinear = -1,
+            Collinear = -1,
             Clockwise = 0,
             Counterclockwise = 1,
         }
@@ -68,24 +67,35 @@ namespace Aufgabe1_API
             double orientation = (c.y - a.y) * (b.x - a.x) - (b.y - a.y) * (c.x - a.x);
 
             if (orientation < 00) return VectorOrder.Clockwise;
-            if (orientation == 0) return VectorOrder.Colinear;
+            if (orientation == 0) return VectorOrder.Collinear;
             if (orientation > 00) return VectorOrder.Counterclockwise;
 
             throw new NotFiniteNumberException();
         }
+        /// <summary>
+        /// Like Orientation, but provides a margin for collinearity
+        /// </summary>
+        /// <param name="epsilon">The margin for collinearity</param>
+        public static VectorOrder OrientationApprox(Vector a, Vector b, Vector c, double epsilon)
+        {
+            double orientation = (c.y - a.y) * (b.x - a.x) - (b.y - a.y) * (c.x - a.x);
+
+            if (orientation < -epsilon) return VectorOrder.Clockwise;
+            if (orientation > epsilon) return VectorOrder.Counterclockwise;
+
+            if (double.IsNaN(orientation)) throw new NotFiniteNumberException();
+            return VectorOrder.Collinear;
+        }
         public static bool IntersectingLines(Vector startA, Vector endA, Vector startB, Vector endB)
         {
-            //if (startA == startB && endA == endB || startA == endB && endA == startB) return true;
-
             VectorOrder sAsBeB = Orientation(startA, startB, endB);
             VectorOrder eAsBeB = Orientation(endA, startB, endB);
             VectorOrder sAeAsB = Orientation(startA, endA, startB);
             VectorOrder sAeAeB = Orientation(startA, endA, endB);
 
             return (sAsBeB != eAsBeB && sAeAsB != sAeAeB)
-                  && !(sAeAeB == VectorOrder.Colinear || eAsBeB == VectorOrder.Colinear || sAeAsB == VectorOrder.Colinear || sAeAeB == VectorOrder.Colinear);
+                  && !(sAeAeB == VectorOrder.Collinear || eAsBeB == VectorOrder.Collinear || sAeAsB == VectorOrder.Collinear || sAeAeB == VectorOrder.Collinear);
         }
-        #endregion
 
         public override bool Equals(object obj) => obj is Vector vec && vec.x == x && vec.y == y;
 
