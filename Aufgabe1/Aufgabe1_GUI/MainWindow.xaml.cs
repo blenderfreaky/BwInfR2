@@ -18,43 +18,26 @@ namespace Aufgabe1_GUI
     /// </summary>
     public partial class MainWindow : MaterialWindow
     {
-        public Map map;
+        private double off = 100000;
+        private Map _map;
+        public Map map
+        {
+            get => _map;
+            set
+            {
+                _map = value;
+                Back.Margin = new Thickness(off, off + map.allPolygonVertices.Average(x => x.vector.y) * 2, off, off);
+            }
+        }
 
         public MainWindow()
         {
+            InitializeComponent();
+
             string root = "../../../../Examples/Aufgabe1/";
             map = new Map(File.ReadAllLines(root + "lisarennt1.txt"));
 
-            /**
-            map = new Map(new Polygon[]
-                {
-                    new Polygon(new Vector[] {new Vector(50, 50), new Vector(100, 50), new Vector(100,100), new Vector(50, 100), }),
-                    new Polygon(new Vector[] {new Vector(70, 150), new Vector(120, 150), new Vector(120,200), new Vector(70, 200), }),
-                    new Polygon(new Vector[] {new Vector(50, 250), new Vector(100, 250), new Vector(100,300), new Vector(50, 300), }),
-                },
-                new Vector[] { new Vector(0, 0), new Vector(0, 1000000) },
-                new Vector(50, 150),
-                30, 15);
-            /**/
-            /**
-            map = new Map(new Polygon[]
-                {
-                    new Polygon(new Vector[] {new Vector(50, 50), new Vector(50, 100), new Vector(100, 100), new Vector(100, 50), }),
-                    new Polygon(new Vector[] {new Vector(150, 50), new Vector(150, 100), new Vector(200, 100), new Vector(200, 50), }),
-                },
-                new Vector[] { new Vector(0, 0), new Vector(0, 1000000) },
-                new Vector(50, 150),
-                30, 15);
-            /**/
-
-            InitializeComponent();
-
-            double off = 100000;
             Off.Margin = new Thickness(-off);
-            Back.Margin = new Thickness(off, off + map.allPolygonVertices.Average(x => x.vector.y) * 2, off, off);
-
-            characterSpeed.Text = "15";
-            busSpeed.Text = "30";
         }
 
         private void DrawPolygons(object sender = null, RoutedEventArgs e = null)
@@ -183,17 +166,11 @@ Weg: {string.Join("\n    => ", Enumerable.Reverse(optimalPath).Select(x => $"({x
             if (diag.ShowDialog() == true)
             {
                 map = new Map(File.ReadAllLines(diag.FileName));
-                map.SetSpeed(characterSpeed.NumberValue, busSpeed.NumberValue);
                 Draw();
                 DrawBuspath();
                 DrawPolygons();
             }
         }
-
-        private void BusSpeed_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) =>
-            map.SetSpeed(characterSpeed.NumberValue, busSpeed.NumberValue);
-        private void CharacterSpeed_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) =>
-            map.SetSpeed(characterSpeed.NumberValue, busSpeed.NumberValue);
 
         private void ReDraw(object sender, MouseEventArgs e)
         {

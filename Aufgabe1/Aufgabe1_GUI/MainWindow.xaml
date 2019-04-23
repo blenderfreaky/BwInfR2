@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Aufgabe1_GUI"
         xmlns:material="clr-namespace:MaterialDesign2.Controls;assembly=MaterialDesign2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="587" Width="881">
+        Title="Aufgabe 1" Height="587" Width="881">
     <Grid>
         <material:PanBorder Background="White">
             <Grid x:Name="Off" Background="White" MouseMove="ReDraw">
@@ -59,20 +59,13 @@
                             <material:MaterialButton x:Name="direction" Text="Direction" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
                         </StackPanel>
                     </Border>
-                    <Border Background="#FFFF8383" Margin="3" CornerRadius="5">
-                        <StackPanel>
-                            <TextBlock Text="SETTINGS" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="Black" FontWeight="Bold"/>
-                            <material:MaterialTextBoxFilled x:Name="characterSpeed" NumberPane="RealPlus" Label="Lisas Speed" NumberValue="15" TextChanged="CharacterSpeed_TextChanged" Margin="3" Background="#FFE6E6E6" Width="180" Height="50" Foreground="White" FontSize="25" LabelFontSize="25" LeftMinWidth="20" ActiveLabelFontSize="15"/>
-                            <material:MaterialTextBoxFilled x:Name="busSpeed" NumberPane="RealPlus" Label="Bus Speed" NumberValue="30" TextChanged="BusSpeed_TextChanged" Margin="3" Background="#FFE6E6E6" Width="180" Height="50" Foreground="White" FontSize="25" LabelFontSize="25" LeftMinWidth="20" ActiveLabelFontSize="15"/>
-                        </StackPanel>
-                    </Border>
                 </StackPanel>
             </Grid>
         </DockPanel>
         <Border x:Name="outputBorder" Background="#7F661717" Margin="3" CornerRadius="5" HorizontalAlignment="Right" VerticalAlignment="Top">
             <StackPanel>
                 <TextBlock Text="OUTPUT" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="Black" FontWeight="Bold"/>
-                <TextBlock Text="" x:Name="output" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="White"/>
+                <TextBox IsReadOnly="True" Text="" x:Name="output" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="White" Background="{x:Null}" BorderBrush="{x:Null}"/>
             </StackPanel>
         </Border>
     </Grid>
