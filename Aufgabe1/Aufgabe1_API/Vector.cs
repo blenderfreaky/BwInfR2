@@ -40,9 +40,6 @@ namespace Aufgabe1_API
         public double WedgeProduct(Vector other) => x * other.y - y * other.x;
         public static double WedgeProduct(Vector vec, Vector other) => vec.x * other.y - vec.y * other.x;
 
-        public double AngleTo(Vector other) => MathHelper.ModuloAngle(-Math.Atan2(WedgeProduct(other), Dot(other)));
-        public static double AngleTo(Vector vec, Vector other) => MathHelper.ModuloAngle(-Math.Atan2(WedgeProduct(vec, other), Dot(vec, other)));
-
         public Vector Normalize() => x == 0 && y == 0 ? this : this / Magnitude();
         public static Vector Normalize(Vector vec) => vec.x == 0 && vec.y == 0 ? vec : vec / vec.Magnitude();
 

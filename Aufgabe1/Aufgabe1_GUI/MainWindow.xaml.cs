@@ -1,6 +1,7 @@
 ﻿using Aufgabe1_API;
 using MaterialDesign2.Controls;
 using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -89,7 +90,7 @@ namespace Aufgabe1_GUI
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center,
 
-                    Points = new PointCollection(map.busPath.Select(x => new Point(x.x, -x.y))),
+                    Points = new PointCollection(map.busPath.Select(x => new Point(MathHelper.Clamp(x.x, -99999, 99999), -MathHelper.Clamp(x.y, -99999, 99999)))), //Values bigger than 199999 don't render properly
                 });
         }
 
@@ -98,17 +99,15 @@ namespace Aufgabe1_GUI
             Navmap.Children.Clear();
             Debugging.Children.Clear();
 
-            if (mouseRay.IsToggledOn) { DrawVisibilityPolygon(); }
-            if (mouseRayVertex.IsToggledOn) { DrawVisibilityPolygonVertex(); }
-            if (visibility.IsToggledOn) { DrawVisibilityGraph(); }
-            if (heuristic.IsToggledOn) { DrawDijkstraHeuristic(); }
-            if (optimal.IsToggledOn) { DrawOptimalPath(); }
+            if (mouseRay.IsToggledOn) DrawVisibilityPolygon();
+            if (mouseRayVertex.IsToggledOn) DrawVisibilityPolygonVertex();
+            if (visibility.IsToggledOn) DrawVisibilityGraph();
+            if (heuristic.IsToggledOn) DrawDijkstraHeuristic();
+            if (optimal.IsToggledOn) DrawOptimalPath(); else outputBorder.Visibility = Visibility.Collapsed;
 
             Vector Mix(Vertex vert, double length, double side) => vert.Next.vector - (vert.Next.vector - vert.vector).Let(x => x.Left * side + x).Normalize() * length;
             if (direction.IsToggledOn) Debugging.DrawLines(map.polygons.SelectMany(x => x.SelectMany(y => new[] { (y.vector, y.Next.vector), (y.Next.vector, Mix(y, 5, -1)), (y.Next.vector, Mix(y, 5, 1)) })), Brushes.Orange, 0.75);
-
-            if (convexity.IsToggledOn) Debugging.DrawLines(map.allPolygonVertices.Where(x => x.isConvex).Select(x => (x.vector - x.normal * 5, x.vector + x.normal * 5)), Brushes.Green, 0.75);
-
+            if (concavity.IsToggledOn) Debugging.DrawLines(map.allPolygonVertices.Where(x => x.isConcave).Select(x => (x.vector - x.normal * 5, x.vector + x.normal * 5)), Brushes.Green, 0.75);
             if (normals.IsToggledOn) Debugging.DrawLines(map.allPolygonVertices.Select(x => (x.vector, x.vector + x.normal * 5)), Brushes.Blue, 0.75);
         }
 
@@ -137,10 +136,21 @@ namespace Aufgabe1_GUI
             DrawLines(map.GenerateDijkstraHeuristic(true, out _, out _, out var debug).Select(x => (x.Key.vector, x.Value.vector)), debug, redraw);
         private void DrawOptimalPath(bool redraw = true)
         {
-            var optimalPath = map.GetOptimalPath(out var debug);
+            outputBorder.Visibility = Visibility.Visible;
+
+            var optimalPath = map.GetOptimalPath(out double characterLength, out double busLength, out double advantage, out var debug);
             List<(Vector, Vector)> vertices = new List<(Vector, Vector)>();
             for (int i = 0; i < optimalPath.Count - 1; i++) vertices.Add((optimalPath[i].vector, optimalPath[i + 1].vector));
             DrawLines(vertices, debug, redraw);
+
+            DateTime start = DateTime.Now.Let(x => new DateTime(x.Year, x.Month, x.Day, 7, 30, 0));
+
+            output.Text =
+@$"Startzeit: {(start - TimeSpan.FromSeconds(advantage)).ToLongTimeString()}
+Ankunft: {(start + TimeSpan.FromSeconds(busLength / map.busSpeed)).ToLongTimeString()}
+Fahrzeit: {TimeSpan.FromSeconds(busLength / map.busSpeed).ToString(@"hh\:mm\:ss\.ffff")}
+Laufzeit: {TimeSpan.FromSeconds(characterLength / map.characterSpeed).ToString(@"hh\:mm\:ss\.ffff")}
+Weg: {string.Join("\n    => ", Enumerable.Reverse(optimalPath).Select(x => $"({x.vector.x.ToString("0.####")}, {x.vector.y.ToString("0.####")})"))}";
         }
 
         private void DrawLines(IEnumerable<(Vector, Vector)> vertices, IEnumerable<(Vector, Vector)> debug, bool redraw = true)
@@ -182,7 +192,6 @@ namespace Aufgabe1_GUI
 
         private void BusSpeed_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) =>
             map.SetSpeed(characterSpeed.NumberValue, busSpeed.NumberValue);
-
         private void CharacterSpeed_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) =>
             map.SetSpeed(characterSpeed.NumberValue, busSpeed.NumberValue);
 
@@ -190,6 +199,36 @@ namespace Aufgabe1_GUI
         {
             if (mouseRay.IsToggledOn) Draw();
             if (mouseRayVertex.IsToggledOn) Draw();
+        }
+
+        private void MouseRay_Click(object sender, RoutedEventArgs e)
+        {
+            mouseRayVertex.IsToggledOn = visibility.IsToggledOn = heuristic.IsToggledOn = optimal.IsToggledOn = false;
+            Draw();
+        }
+
+        private void MouseRayVertex_Click(object sender, RoutedEventArgs e)
+        {
+            mouseRay.IsToggledOn = visibility.IsToggledOn = heuristic.IsToggledOn = optimal.IsToggledOn = false;
+            Draw();
+        }
+
+        private void Visibility_Click(object sender, RoutedEventArgs e)
+        {
+            mouseRay.IsToggledOn = mouseRayVertex.IsToggledOn = heuristic.IsToggledOn = optimal.IsToggledOn = false;
+            Draw();
+        }
+
+        private void Heuristic_Click(object sender, RoutedEventArgs e)
+        {
+            mouseRay.IsToggledOn = mouseRayVertex.IsToggledOn = visibility.IsToggledOn = optimal.IsToggledOn = false;
+            Draw();
+        }
+
+        private void Optimal_Click(object sender, RoutedEventArgs e)
+        {
+            mouseRay.IsToggledOn = mouseRayVertex.IsToggledOn = visibility.IsToggledOn = heuristic.IsToggledOn = false;
+            Draw();
         }
     }
 }

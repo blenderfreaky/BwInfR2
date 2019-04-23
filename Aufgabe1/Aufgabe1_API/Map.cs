@@ -19,22 +19,41 @@ namespace Aufgabe1_API
 
             for (int i = 0; i < polygonCount; i++)
             {
-                int[] polygon = lines[i + 1].Split().Select(x => int.Parse(x)).ToArray();
-                var vertices = new Vector[polygon[0]];
+                double[] polygon = lines[i + 1].Split().Select(x => double.Parse(x)).ToArray();
+                var vertices = new Vector[(int)polygon[0]];
 
                 for (int j = 0; j < polygon[0]; j++) vertices[j] = new Vector(polygon[j * 2 + 1], polygon[j * 2 + 2]);
 
                 polygons[i] = new Polygon(vertices);
             }
 
-            int[] start = lines[polygonCount + 1].Split().Select(x => int.Parse(x)).ToArray();
-            startingPosition = new Vertex(new Vector(start[0], start[1]));
-
-            busPath = new Vector[] { new Vector(0, 0), new Vector(0, 10000) };
-
             allPolygonVertices = polygons.SelectMany(x => x).ToList();
 
-            SetSpeed(15, 30);
+            double[] start = lines[polygonCount + 1].Split().Select(x => double.Parse(x)).ToArray();
+            startingPosition = new Vertex(new Vector(start[0], start[1]));
+
+            if (lines.Length <= polygonCount + 2 || string.IsNullOrWhiteSpace(lines[polygonCount + 2]))
+            {
+                busPath = new Vector[] { new Vector(0, 0), new Vector(0, Math.Sqrt(double.MaxValue)) };
+
+                SetSpeed(15, 30);
+            }
+            else
+            {
+                double[] path = lines[polygonCount + 2].Split().Select(x =>
+                    x == "inf"
+                  ? Math.Sqrt(double.MaxValue)
+                  : x == "-inf"
+                    ? Math.Sqrt(double.MinValue)
+                    : double.Parse(x)).ToArray();
+                busPath = new Vector[(int)path[0]];
+
+                for (int j = 0; j < path[0]; j++) busPath[j] = new Vector(path[j * 2 + 1], path[j * 2 + 2]);
+
+                double[] speeds = lines[polygonCount + 3].Split().Select(x => double.Parse(x)).ToArray();
+
+                SetSpeed(speeds[0], speeds[1]);
+            }
         }
 
         public void SetSpeed(double characterSpeed, double busSpeed)
@@ -49,12 +68,10 @@ namespace Aufgabe1_API
             this.polygons = polygons;
             this.busPath = busPath;
             this.startingPosition = new Vertex(startingPosition);
-            this.busSpeed = busSpeed;
-            this.characterSpeed = characterSpeed;
 
             allPolygonVertices = polygons.SelectMany(x => x).ToList();
 
-            busApproachConstant = characterSpeed / Math.Sqrt(busSpeed * busSpeed - characterSpeed * characterSpeed);
+            SetSpeed(characterSpeed, busSpeed);
         }
 
         public IEnumerable<Vector> GetEndpoints(Vector dot)
@@ -68,46 +85,32 @@ namespace Aufgabe1_API
                 double distance = dotProduct / busPathNormal.MagnitudeSquared();
                 distance += (dot - (busPath[i] + busPathNormal * distance)).Magnitude() * busApproachConstant / busPathNormal.Magnitude();
 
-                yield return busPath[i] + busPathNormal * (distance < 0 ? 0 : distance > 1 ? 1 : distance);
+                yield return busPath[i] + busPathNormal * MathHelper.Clamp(distance, 0, 1);
             }
         }
 
-        public double GetBusDuration(Vector vec)
+        public double GetBusLength(Vector vec)
         {
             double distance = 0;
             for (int i = 0; i < busPath.Length - 1; i++)
             {
                 (Vector start, Vector end) = (busPath[i], busPath[i + 1]);
 
-                double segmentLength = start.DistanceSquared(end);
+                double segmentLength = start.Distance(end);
+
+                if (Vector.OrientationApprox(start, end, vec, epsilon) == Vector.VectorOrder.Collinear) return distance + start.Distance(vec);
+
                 distance += segmentLength;
-
-                if (Vector.Orientation(start, end, vec) != Vector.VectorOrder.Collinear) continue;
-
-                return distance - end.Distance(vec);
             }
-            return double.PositiveInfinity;
+            return double.NaN;
         }
 
-        public double CalculateDistance(Vertex vertex, Vector origin, double angle)
+        public double CalculateDistanceAtAngle(Vertex vertex, Vector origin, double angle)
         {
             Vector a = vertex.vector - origin;
             Vector b = vertex.Next.vector - origin;
             return ((a.y - b.y) * b.x - (a.x - b.x) * b.y) / (Math.Cos(angle) * (a.y - b.y) - Math.Sin(angle) * (a.x - b.x));
         }
-
-        /*public double ShortestDistanceSquared(Vertex vertex, Vector origin)
-        {
-            Vector first = vertex.vector, second = vertex.Next.vector;
-
-            var length = Vector.DistanceSquared(first, second);
-            if (length == 0) return Vector.DistanceSquared(origin, first);
-
-            double lambda = ((origin.x - first.x) * (second.x - first.x) + (origin.y - first.y) * (second.y - first.y)) / length;
-            lambda = MathHelper.Clamp(lambda, 0, 1);
-
-            return Vector.DistanceSquared(origin, new Vector (first.x + lambda * (second.x - first.x), first.y + lambda * (second.y - first.y)));
-        }*/
 
         public double epsilon = 1E-15;
 
@@ -149,8 +152,7 @@ namespace Aufgabe1_API
                     // a and b are on opposing sides of ray from origin to shared point (current ray in sweep-line algorithm)
                     if (Vector.OrientationApprox(origin, a1, b2, epsilon) != Vector.OrientationApprox(origin, a1, a2, epsilon)) 
                     {
-                        // You shouldn't ever get here, but somehow you do
-                        throw null;
+                        throw new Exception("Attempted Change to early");
                     }
 
                     // b2 is on the same side of a as origin => b is below a
@@ -183,12 +185,11 @@ namespace Aufgabe1_API
                 }
             });
             SortedSet<Vertex> intersections = new SortedSet<Vertex>(comparer);
-            //List<Vertex> intersections = new List<Vertex>();
 
             foreach (Vertex polygonVertex in allPolygonVertices)
             {
                 if ((polygonVertex.Next.vector - origin).y * (polygonVertex.vector - origin).y < -epsilon
-                 && CalculateDistance(polygonVertex, origin, 0) >= epsilon)
+                 && CalculateDistanceAtAngle(polygonVertex, origin, 0) >= epsilon)
                 {
                     intersections.Add(polygonVertex);
                 }
@@ -214,7 +215,6 @@ namespace Aufgabe1_API
 
                 if (intersections.Count != 0 &&
                     intersections.First().Let(x => Vector.IntersectingLines(origin, target.vector, x.vector, x.Next.vector))) return false;
-                    //intersections.Any(x => Vector.IntersectingLines(origin, target.vector, x.vector, x.Next.vector))) return false;
 
                 var furthestDistance =
                     GetLeft()
@@ -279,10 +279,6 @@ namespace Aufgabe1_API
 
             foreach ((List<Vertex> vertices, double prevAngle, double currentAngle, double nextAngle) in vertsByAngle)
             {
-                double edge = Math.PI * .13;
-                if (prevAngle < edge && edge <= currentAngle)
-                    ;
-
                 foreach (Vertex vert in vertices)
                 {
                     if (vert.polygon is null) continue;
@@ -301,19 +297,6 @@ namespace Aufgabe1_API
                 leftTouching.Clear();
                 rightTouching.Clear();
 
-                if (prevAngle < edge && edge <= currentAngle)
-                {
-                    Vector edgeVec = new Vector(currentAngle);
-                    int j = 0;
-                    foreach (var inter in intersections)
-                    {
-                        debugOut.Add((inter.vector, inter.Next.vector));
-                        debugOut.Add((origin + edgeVec.Left * j, origin + edgeVec * CalculateDistance(inter, origin, currentAngle) + edgeVec.Left * j));
-                        j += 3;
-                    }
-                    //debugOut.Add((origin, origin + edgeVec * 10000));
-                }
-                
                 delta.ForEach(x => intersections.Add(x));
                 delta.Clear();
             }
@@ -367,14 +350,18 @@ namespace Aufgabe1_API
             return dijkstra;
         }
 
-        public List<Vertex> GetOptimalPath(out List<(Vector, Vector)> debug)
+        public List<Vertex> GetOptimalPath(out double characterLength, out double busLength, out double advantage, out List<(Vector, Vector)> debug)
         {
             var heuristic = GenerateDijkstraHeuristic(true, out var visitedNodes, out var endpoints, out debug);
 
-            Dictionary<Vertex, double> times = endpoints.Where(x => heuristic.ContainsKey(x)).ToDictionary(x => x,
-                x => Dijkstra.GetPathLength(startingPosition, x, heuristic, visitedNodes) * characterSpeed - GetBusDuration(x.vector) * busSpeed);
+            IEnumerable<(Vertex vert, double characterLength, double busLength)> times = endpoints
+                .Where(x => heuristic.ContainsKey(x))
+                .Select(x => 
+                    (x, Dijkstra.GetPathLength(startingPosition, x, heuristic, visitedNodes), GetBusLength(x.vector)));
 
-            return Dijkstra.GetPath(startingPosition, times.MinValue(x => x.Value).value.Key, heuristic);
+            Vertex min;
+            ((min, characterLength, busLength), advantage) = times.MinValue(x => x.characterLength / characterSpeed - x.busLength / busSpeed);
+            return Dijkstra.GetPath(startingPosition, min, heuristic);
         }
     }
 }

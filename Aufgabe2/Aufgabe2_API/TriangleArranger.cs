@@ -9,24 +9,18 @@ namespace Aufgabe2_API
     public static class TriangleArranger
     {
         public static List<Triangle> ArrangeTriangles(List<TriangleArchetype> triangleArchetypes, out List<(Vector, Vector)> debug)
+            => ArrangeTriangles(new List<Triangle>(), triangleArchetypes, out debug);
+        private static List<Triangle> ArrangeTriangles(List<Triangle> prev, List<TriangleArchetype> triangleArchetypes, out List<(Vector, Vector)> debug)
         {
-            List<TriangleArchetype> byMinAngles = triangleArchetypes
-                .Select(x => Enumerable.Range(0, 3)
-                    .MinValue(y => x.angles[y])
-                    .Let(y => new TriangleArchetype {
-                        angles = Enumerable.Range(0, 3)
-                            .Select(z => x.angles[(z + y.value) % 3])
-                            .ToArray(),
-                        lengths = Enumerable.Range(0, 3)
-                            .Select(z => x.lengths[(z + y.value) % 3])
-                            .ToArray()
-                    }))
-                .OrderBy(x => x.angles[0])
-                .ToList();
+            var debugOut = new List<(Vector, Vector)>();
 
-            debug = new List<(Vector, Vector)>();
+            TriangleArchetype toAdd = triangleArchetypes.First();
 
-            List<Triangle> triangles = new List<Triangle>();
+            Triangle added= ;
+
+            prev.Add
+
+            debug = debugOut;
         }
     }
 }

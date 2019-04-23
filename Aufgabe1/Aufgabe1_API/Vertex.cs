@@ -11,7 +11,7 @@ namespace Aufgabe1_API
         public readonly Polygon polygon;
         public readonly int index;
 
-        public bool isConvex;
+        public bool isConcave;
         public Vector normal;
 
         public Vertex(Vector vector)
@@ -19,7 +19,7 @@ namespace Aufgabe1_API
             this.vector = vector;
             polygon = null;
             index = 0;
-            isConvex = false;
+            isConcave = false;
             normal = null;
         }
 
@@ -28,14 +28,14 @@ namespace Aufgabe1_API
             this.vector = vector;
             this.polygon = polygon;
             this.index = index;
-            isConvex = false;
+            isConcave = false;
             normal = null;
         }
 
         public Vertex Init()
         {
-            isConvex = Vector.Orientation(Previous.vector, vector, Next.vector) == Vector.VectorOrder.Clockwise;
-            normal = isConvex
+            isConcave = Vector.Orientation(Previous.vector, vector, Next.vector) == Vector.VectorOrder.Clockwise;
+            normal = isConcave
                     ? ((Previous.vector - vector).Normalize() + (Next.vector - vector).Normalize())
                     : -((Previous.vector - vector).Normalize() + (Next.vector - vector).Normalize());
             return this;
@@ -53,13 +53,13 @@ namespace Aufgabe1_API
                           ^ Vector.Orientation(vector, Next.vector, other) == Vector.VectorOrder.Counterclockwise;
             double dot = Vector.Dot(other - vector, normal);
 
-            return isConvex
+            return isConcave
                     ? !enclosed || dot < 0
                     : enclosed && dot < 0;
         }
 
         public bool BetweenNeighbors(Vector other) =>
-            !isConvex && (Vector.Orientation(vector, Previous.vector, other) != Vector.Orientation(Next.vector, vector, other));
+            !isConcave && (Vector.Orientation(vector, Previous.vector, other) != Vector.Orientation(Next.vector, vector, other));
 
         public double Dot(Vertex other) => (Next.vector - vector).Normalize().Dot((other.Next.vector - other.vector).Normalize());
         public double Dot(Vector start, Vector end) => (Next.vector - vector).Normalize().Dot((end - start).Normalize());

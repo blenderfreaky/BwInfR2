@@ -38,24 +38,24 @@
                     <Border Background="#FFFF8383" Margin="3" CornerRadius="5">
                         <StackPanel>
                             <TextBlock Text="FILE" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="Black" FontWeight="Bold"/>
-                            <material:MaterialButton x:Name="open" Text="Open" Click="Open_Click" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
+                            <material:MaterialButton x:Name="open" Text="Open" Click="Open_Click" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25"/>
                         </StackPanel>
                     </Border>
                     <Border Background="#FFFF8383" Margin="3" CornerRadius="5">
                         <StackPanel>
                             <TextBlock Text="RESULTS" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="Black" FontWeight="Bold"/>
-                            <material:MaterialButton x:Name="mouseRay" Text="Mouse" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
-                            <material:MaterialButton x:Name="mouseRayVertex" Text="Nearest Vertex" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
-                            <material:MaterialButton x:Name="visibility" Text="Visibility Graph" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
-                            <material:MaterialButton x:Name="heuristic" Text="Dijkstra Heuristic" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
-                            <material:MaterialButton x:Name="optimal" Text="Optimal Path" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
+                            <material:MaterialButton x:Name="mouseRay" Text="Mouse" Click="MouseRay_Click" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
+                            <material:MaterialButton x:Name="mouseRayVertex" Text="Nearest Vertex" Click="MouseRayVertex_Click" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
+                            <material:MaterialButton x:Name="visibility" Text="Visibility Graph" Click="Visibility_Click" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
+                            <material:MaterialButton x:Name="heuristic" Text="Dijkstra Heuristic" Click="Heuristic_Click" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
+                            <material:MaterialButton x:Name="optimal" Text="Optimal Path" Click="Optimal_Click" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
                         </StackPanel>
                     </Border>
                     <Border Background="#FFFF8383" Margin="3" CornerRadius="5">
                         <StackPanel>
                             <TextBlock Text="DEBUG" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="Black" FontWeight="Bold"/>
                             <material:MaterialButton x:Name="normals" Text="Normals" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
-                            <material:MaterialButton x:Name="convexity" Text="Convexity" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
+                            <material:MaterialButton x:Name="concavity" Text="Concaveity" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
                             <material:MaterialButton x:Name="direction" Text="Direction" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
                         </StackPanel>
                     </Border>
@@ -69,5 +69,11 @@
                 </StackPanel>
             </Grid>
         </DockPanel>
+        <Border x:Name="outputBorder" Background="#7F661717" Margin="3" CornerRadius="5" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <StackPanel>
+                <TextBlock Text="OUTPUT" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="Black" FontWeight="Bold"/>
+                <TextBlock Text="" x:Name="output" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="White"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </material:MaterialWindow>

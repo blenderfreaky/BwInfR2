@@ -12,6 +12,8 @@ namespace Aufgabe1_API
             while (angle >= Math.PI * 2) angle -= Math.PI * 2;
             return angle;
         }
+
+        public static double SmallestAngleBetween(double angle1, double angle2) => (ModuloAngle(angle2 - angle1) - Math.PI) % Math.PI;
         public static int GetAngleSide(double angle1, double angle2) => ModuloAngle(angle2 - angle1) == 0 ? 0 : ModuloAngle(angle2 - angle1).CompareTo(Math.PI);
         public static double Clamp(double value, double min, double max) => value < min ? min : value > max ? max : value;
 
@@ -67,11 +69,5 @@ namespace Aufgabe1_API
         }
         public static T2 Let<T1, T2>(this T1 obj, Func<T1, T2> func) => func(obj);
         public static void Let<T>(this T obj, Action<T> action) => action(obj);
-        /*public static void AddSorted<T>(this List<T> list, T elem, IComparer<T> comparer) 
-            => list.BinarySearch(elem, comparer).Let(x => list.Insert(x < 0 ? ~x : x, elem));
-        public static bool RemoveSorted<T>(this List<T> list, T elem, IComparer<T> comparer)
-            => list.BinarySearch(elem, comparer).Let(x => { if (x >= 0) list.RemoveAt(x); return x >= 0; });
-        public static bool ContainsSorted<T>(this List<T> list, T elem, IComparer<T> comparer)
-            => list.BinarySearch(elem, comparer) > 0;*/
     }
 }
