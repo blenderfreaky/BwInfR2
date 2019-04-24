@@ -56,13 +56,6 @@ namespace Aufgabe1_API
             }
         }
 
-        public void SetSpeed(double characterSpeed, double busSpeed)
-        {
-            this.characterSpeed = characterSpeed;
-            this.busSpeed = busSpeed;
-            busApproachConstant = characterSpeed / Math.Sqrt(busSpeed * busSpeed - characterSpeed * characterSpeed);
-        }
-
         public Map(Polygon[] polygons, Vector[] busPath, Vector startingPosition, double busSpeed, double characterSpeed)
         {
             this.polygons = polygons;
@@ -72,6 +65,13 @@ namespace Aufgabe1_API
             allPolygonVertices = polygons.SelectMany(x => x).ToList();
 
             SetSpeed(characterSpeed, busSpeed);
+        }
+
+        public void SetSpeed(double characterSpeed, double busSpeed)
+        {
+            this.characterSpeed = characterSpeed;
+            this.busSpeed = busSpeed;
+            busApproachConstant = characterSpeed / Math.Sqrt(busSpeed * busSpeed - characterSpeed * characterSpeed);
         }
 
         public IEnumerable<Vector> GetEndpoints(Vector dot)
@@ -130,7 +130,7 @@ namespace Aufgabe1_API
                 .Concat(endpoints)
                 .ToDictionary(x => x, x => x.vector.Angle(origin));
 
-            // Edges are kept as the vertex with the lower index of the two defining vertices
+            // Edges are stored as the vertex with the lower index of the two defining vertices
             IComparer<Vertex> comparer = Comparer<Vertex>.Create((a, b) =>
             {
                 if (ReferenceEquals(a, b) || a == b) return 0;
@@ -170,7 +170,7 @@ namespace Aufgabe1_API
                         return origin.DistanceSquared(a1).CompareTo(origin.DistanceSquared(b1));
                     }
                     else if (ba1 == ba2 // a1 and a2 are entirely above or below b
-                          || ba1 == Vector.VectorOrder.Collinear || ba2 == Vector.VectorOrder.Collinear) // or a has one point on b => a is entirely above or below b
+                            || ba1 == Vector.VectorOrder.Collinear || ba2 == Vector.VectorOrder.Collinear) // or a has one point on b => a is entirely above or below b
                     { 
                         var bOrigin = Vector.OrientationApprox(b1, b2, origin, epsilon);
                         return bOrigin == ba1 // a1 is on the same side of b as origin => a is closer 
@@ -180,7 +180,7 @@ namespace Aufgabe1_API
                     else // a1 and a2 are on opposing sides of b (a crosses the infinite line containing b) => b is entirely above or below a
                     {
                         return Vector.OrientationApprox(a1, a2, origin, epsilon) == Vector.OrientationApprox(a1, a2, b1, epsilon) // b1 is on the same side of a as origin => b is below a
-                             ? 1 : -1;
+                                ? 1 : -1;
                     }
                 }
             });
@@ -189,7 +189,7 @@ namespace Aufgabe1_API
             foreach (Vertex polygonVertex in allPolygonVertices)
             {
                 if ((polygonVertex.Next.vector - origin).y * (polygonVertex.vector - origin).y < -epsilon
-                 && CalculateDistanceAtAngle(polygonVertex, origin, 0) >= epsilon)
+                    && CalculateDistanceAtAngle(polygonVertex, origin, 0) >= epsilon)
                 {
                     intersections.Add(polygonVertex);
                 }
@@ -221,7 +221,7 @@ namespace Aufgabe1_API
                     .SelectMany(x => GetRight()
                         .Where(y =>
                             (x.min <= y.min && y.min <= x.max)
-                         || (x.min <= y.max && y.max <= x.max)
+                            || (x.min <= y.max && y.max <= x.max)
                         ) // Only take intersections
                         .Select(y => Math.Max(x.min, y.min))
                     )
@@ -261,9 +261,9 @@ namespace Aufgabe1_API
                 // Collinear lines aren't intersections, only their position on the ray is used
                 if (Vector.OrientationApprox(origin, first.vector, second.vector, epsilon) != Vector.VectorOrder.Collinear) delta.Add(first);
                 leftTouching.Add(angles[first] == angles[second]
-                       ? (origin.DistanceSquared(first.vector), origin.DistanceSquared(second.vector)) // Squaring later is cheaper than Sqrt here
-                         .Let(x => x.Item1 < x.Item2 ? x : (x.Item2, x.Item1))
-                       : origin.DistanceSquared(first.vector).Let(x => (x, x)));
+                        ? (origin.DistanceSquared(first.vector), origin.DistanceSquared(second.vector)) // Squaring later is cheaper than Sqrt here
+                            .Let(x => x.Item1 < x.Item2 ? x : (x.Item2, x.Item1))
+                        : origin.DistanceSquared(first.vector).Let(x => (x, x)));
             }
             void Remove(double prevAngle, double currentAngle, Vertex first, Vertex second)
             {
@@ -272,9 +272,9 @@ namespace Aufgabe1_API
                 // Collinear lines aren't intersections, only their position on the ray is used
                 if (Vector.OrientationApprox(origin, first.vector, second.vector, epsilon) != Vector.VectorOrder.Collinear) intersections.Remove(first);
                 rightTouching.Add(angles[first] == angles[second]
-                       ? (origin.DistanceSquared(first.vector), origin.DistanceSquared(second.vector)) // Squaring later is cheaper than Sqrt here
-                         .Let(x => x.Item1 < x.Item2 ? x : (x.Item2, x.Item1))
-                       : origin.DistanceSquared(first.vector).Let(x => (x, x)));
+                        ? (origin.DistanceSquared(first.vector), origin.DistanceSquared(second.vector)) // Squaring later is cheaper than Sqrt here
+                            .Let(x => x.Item1 < x.Item2 ? x : (x.Item2, x.Item1))
+                        : origin.DistanceSquared(first.vector).Let(x => (x, x)));
             }
 
             foreach ((List<Vertex> vertices, double prevAngle, double currentAngle, double nextAngle) in vertsByAngle)

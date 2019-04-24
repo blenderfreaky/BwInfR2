@@ -16,11 +16,14 @@ namespace Aufgabe2_API
 
             TriangleArchetype toAdd = triangleArchetypes.First();
 
-            Triangle added= ;
+            Triangle last = prev.Last();
+           // Triangle added = new Triangle(toAdd, new Vector(0, 0));
 
-            prev.Add
+            //prev.Add
 
             debug = debugOut;
+
+            return prev;
         }
     }
 }

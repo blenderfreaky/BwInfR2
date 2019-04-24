@@ -13,10 +13,19 @@ namespace Aufgabe2_API
 
         public TriangleArchetype(Triangle triangle)
         {
-            angles = new double[3];
-            lengths = new double[3];
+            lengths = new[]
+            {
+                triangle.a.Distance(triangle.b),
+                triangle.b.Distance(triangle.c),
+                triangle.c.Distance(triangle.a),
+            };
 
-            angles[0] = triangle.a.AngleTo(triangle.b);
+            angles = new[]
+            {
+                Math.Acos((lengths[1]*lengths[1]+lengths[2]*lengths[2]-lengths[0]*lengths[0]) / (2*lengths[1]*lengths[2])),
+                Math.Acos((lengths[0]*lengths[0]+lengths[2]*lengths[2]-lengths[1]*lengths[1]) / (2*lengths[0]*lengths[2])),
+                Math.Acos((lengths[1]*lengths[1]+lengths[1]*lengths[1]-lengths[2]*lengths[2]) / (2*lengths[0]*lengths[1])),
+            };
         }
 
         public TriangleArchetype Turn(int amount) => this.Let(@this => new TriangleArchetype
@@ -30,12 +39,19 @@ namespace Aufgabe2_API
     {
         public Vector a, b, c;
 
-        public Triangle(Vector positionOffset, double angleOffset, TriangleArchetype archetype)
+        public Triangle(Vector a, Vector b, Vector c)
+        {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+
+        public Triangle(TriangleArchetype archetype, Vector positionOffset, double angleOffset)
         {
             a = positionOffset;
             b = a + new Vector(archetype.angles[0] + angleOffset) * archetype.lengths[0];
-            c = b + new Vector(archetype.angles[1] + angleOffset) * archetype.lengths[1];
-            Debug.Assert(a.Approx(c + new Vector(archetype.angles[2] + angleOffset) * archetype.lengths[2], 1E-20));
+            c = b + new Vector(archetype.angles[0] - archetype.angles[1] + angleOffset) * archetype.lengths[1];
+            Debug.Assert(a.Approx(c + new Vector(archetype.angles[0] + archetype.angles[1] + archetype.angles[2] + angleOffset) * archetype.lengths[2], 1E-10));
         }
     }
 }

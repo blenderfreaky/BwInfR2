@@ -13,7 +13,7 @@ namespace Aufgabe2_API
             return angle;
         }
 
-        public static double SmallestAngleBetween(double angle1, double angle2) => (ModuloAngle(angle2 - angle1) - Math.PI) % Math.PI;
+        public static double SmallerAngleSide(double angle) => Math.Min(ModuloAngle(angle), ModuloAngle(2*Math.PI - angle));
         public static int GetAngleSide(double angle1, double angle2) => ModuloAngle(angle2 - angle1) == 0 ? 0 : ModuloAngle(angle2 - angle1).CompareTo(Math.PI);
         public static double Clamp(double value, double min, double max) => value < min ? min : value > max ? max : value;
 

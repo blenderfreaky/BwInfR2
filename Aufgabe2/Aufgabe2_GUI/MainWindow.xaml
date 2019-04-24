@@ -9,9 +9,9 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <material:PanBorder>
-            <Grid x:Name="Off" Background="White" MouseMove="Navmap_Move">
+            <Grid x:Name="Off" Background="White">
                 <Grid x:Name="Back">
-                    <Canvas x:Name="Triangles" Margin="0" Loaded="Polygons_Loaded"/>
+                    <Canvas x:Name="Triangles" Margin="0" Loaded="Triangles_Loaded"/>
                     <Canvas x:Name="Debugging" Margin="0" Loaded="Debugging_Loaded"/>
                     <Line X1="-1E+99" X2="1E+99" Stroke="Black" Fill="Black" StrokeThickness="2"/>
                 </Grid>

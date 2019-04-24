@@ -26,9 +26,13 @@ namespace Aufgabe2
         public MainWindow()
         {
             InitializeComponent();
+        }
 
+        public void Draw()
+        {
+            Draw(new[] { new Triangle(new TriangleArchetype(new Triangle(new Vector(0, 0), new Vector(1, 1), new Vector(2, 0))), new Vector(), 0) }.ToList(), new List<(Vector, Vector)>());
             List<TriangleArchetype> triangleArchetypes = new List<TriangleArchetype>();
-            Draw(TriangleArranger.ArrangeTriangles(triangleArchetypes, out var debug), debug);
+            //Draw(TriangleArranger.ArrangeTriangles(triangleArchetypes, out var debug), debug);
         }
 
         public void Draw(List<Triangle> triangles, List<(Vector, Vector)> debug)
@@ -106,6 +110,16 @@ namespace Aufgabe2
                     }
                 );
             }
+        }
+
+        private void Triangles_Loaded(object sender, RoutedEventArgs e)
+        {
+            Draw();
+        }
+
+        private void Debugging_Loaded(object sender, RoutedEventArgs e)
+        {
+            Draw();
         }
     }
 }
