@@ -44,7 +44,7 @@ namespace Aufgabe1_API
                     x == "inf"
                   ? Math.Sqrt(double.MaxValue)
                   : x == "-inf"
-                    ? Math.Sqrt(double.MinValue)
+                    ? -Math.Sqrt(double.MaxValue)
                     : double.Parse(x)).ToArray();
                 busPath = new Vector[(int)path[0]];
 
@@ -74,8 +74,9 @@ namespace Aufgabe1_API
             busApproachConstant = characterSpeed / Math.Sqrt(busSpeed * busSpeed - characterSpeed * characterSpeed);
         }
 
-        public IEnumerable<Vector> GetEndpoints(Vector dot)
+        public IEnumerable<(Vertex vert, double busLength)> GetEndpoints(Vector dot)
         {
+            double busLength = 0;
             for (int i = 0; i < busPath.Length - 1; i++)
             {
                 Vector pathToBus = dot - busPath[i];
@@ -85,24 +86,13 @@ namespace Aufgabe1_API
                 double distance = dotProduct / busPathNormal.MagnitudeSquared();
                 distance += (dot - (busPath[i] + busPathNormal * distance)).Magnitude() * busApproachConstant / busPathNormal.Magnitude();
 
-                yield return busPath[i] + busPathNormal * MathHelper.Clamp(distance, 0, 1);
+                if (distance >= 0 && distance <= 1)
+                {
+                    yield return (new Vertex(busPath[i] + busPathNormal * distance), busLength + busPathNormal.Magnitude() * distance);
+                }
+
+                busLength += busPathNormal.Magnitude();
             }
-        }
-
-        public double GetBusLength(Vector vec)
-        {
-            double distance = 0;
-            for (int i = 0; i < busPath.Length - 1; i++)
-            {
-                (Vector start, Vector end) = (busPath[i], busPath[i + 1]);
-
-                double segmentLength = start.Distance(end);
-
-                if (Vector.OrientationApprox(start, end, vec, epsilon) == Vector.VectorOrder.Collinear) return distance + start.Distance(vec);
-
-                distance += segmentLength;
-            }
-            return double.NaN;
         }
 
         public double CalculateDistanceAtAngle(Vertex vertex, Vector origin, double angle)
@@ -114,8 +104,8 @@ namespace Aufgabe1_API
 
         public double epsilon = 1E-15;
 
-        public List<Vertex> GenerateVisibilityPolygon(Vector origin, out List<Vertex> endpoints, out List<(Vector, Vector)> debug) => GenerateVisibilityPolygon(new Vertex(origin), out endpoints, out debug);
-        public List<Vertex> GenerateVisibilityPolygon(Vertex originVertex, out List<Vertex> endpoints, out List<(Vector, Vector)> debug)
+        public List<Vertex> GenerateVisibilityPolygon(Vector origin, out List<(Vertex vert, double busLength)> endpoints, out List<(Vector, Vector)> debug) => GenerateVisibilityPolygon(new Vertex(origin), out endpoints, out debug);
+        public List<Vertex> GenerateVisibilityPolygon(Vertex originVertex, out List<(Vertex vert, double busLength)> endpoints, out List<(Vector, Vector)> debug)
         {
             List<(Vector, Vector)> debugOut = new List<(Vector, Vector)>();
 
@@ -124,10 +114,10 @@ namespace Aufgabe1_API
             List<Vertex> visibilityGraph = new List<Vertex>();
             List<Vertex> allPolygonVertices = this.allPolygonVertices.Where(x => !x.vector.Approx(origin, epsilon)).ToList();
 
-            endpoints = GetEndpoints(origin).Select(x => new Vertex(x)).ToList();
+            endpoints = GetEndpoints(origin).ToList();
             Dictionary<Vertex, double> angles =
                 allPolygonVertices
-                .Concat(endpoints)
+                .Concat(endpoints.Select(x => x.Item1))
                 .ToDictionary(x => x, x => x.vector.Angle(origin));
 
             // Edges are stored as the vertex with the lower index of the two defining vertices
@@ -306,10 +296,10 @@ namespace Aufgabe1_API
             return polygon;
         }
 
-        public Dictionary<Vertex, List<Vertex>> GenerateVisibilityGraph(out List<Vertex> endpoints, out List<(Vector, Vector)> debug)
+        public Dictionary<Vertex, List<Vertex>> GenerateVisibilityGraph(out List<(Vertex vert, double busLength)> endpoints, out List<(Vector, Vector)> debug)
         {
             var debugOut = new List<(Vector, Vector)>();
-            var endpointsOut = new List<Vertex>();
+            var endpointsOut = new List<(Vertex vert, double busLength)>();
             var graph =
                 allPolygonVertices
                 .Concat(new[] { startingPosition })
@@ -326,12 +316,12 @@ namespace Aufgabe1_API
             return graph;
         }
 
-        public Dictionary<Vertex, Vertex> GenerateDijkstraHeuristic(bool reduced, out Dictionary<Vertex, Dictionary<Vertex, double>> visitedNodes, out List<Vertex> endpoints, out List<(Vector, Vector)> debug)
+        public Dictionary<Vertex, Vertex> GenerateDijkstraHeuristic(bool reduced, out Dictionary<Vertex, Dictionary<Vertex, double>> visitedNodes, out List<(Vertex vert, double busLength)> endpoints, out List<(Vector, Vector)> debug)
         {
             List<Vertex> allVertices = allPolygonVertices.Concat(new[] { startingPosition }).ToList();
 
             var debugOut = new List<(Vector, Vector)>();
-            var endpointsOut = new List<Vertex>();
+            var endpointsOut = new List<(Vertex vert, double busLength)>();
 
             Dictionary<Vertex, Func<Dictionary<Vertex, double>>> graph =
                 allVertices.ToDictionary(x => x, x =>
@@ -344,7 +334,7 @@ namespace Aufgabe1_API
                     }
                 ));
 
-            var dijkstra = Dijkstra.GenerateDijkstraHeuristicLazy(startingPosition, graph, endpointsOut, out visitedNodes);
+            var dijkstra = Dijkstra.GenerateDijkstraHeuristicLazy(startingPosition, graph, endpointsOut.Select(x => x.vert).ToList(), out visitedNodes);
             debug = debugOut;
             endpoints = endpointsOut;
             return dijkstra;
@@ -355,9 +345,9 @@ namespace Aufgabe1_API
             var heuristic = GenerateDijkstraHeuristic(true, out var visitedNodes, out var endpoints, out debug);
 
             IEnumerable<(Vertex vert, double characterLength, double busLength)> times = endpoints
-                .Where(x => heuristic.ContainsKey(x))
+                .Where(x => heuristic.ContainsKey(x.vert))
                 .Select(x => 
-                    (x, Dijkstra.GetPathLength(startingPosition, x, heuristic, visitedNodes), GetBusLength(x.vector)));
+                    (x.vert, Dijkstra.GetPathLength(startingPosition, x.vert, heuristic, visitedNodes), x.busLength));
 
             Vertex min;
             ((min, characterLength, busLength), advantage) = times.MinValue(x => x.characterLength / characterSpeed - x.busLength / busSpeed);

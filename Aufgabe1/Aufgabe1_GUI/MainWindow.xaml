@@ -49,13 +49,14 @@
                             <material:MaterialButton x:Name="visibility" Text="Visibility Graph" Click="Visibility_Click" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
                             <material:MaterialButton x:Name="heuristic" Text="Dijkstra Heuristic" Click="Heuristic_Click" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
                             <material:MaterialButton x:Name="optimal" Text="Optimal Path" Click="Optimal_Click" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
+                            <material:MaterialButton x:Name="fromMouse" Text="Mouse Start" Click="FromMouse_Click" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
                         </StackPanel>
                     </Border>
                     <Border Background="#FFFF8383" Margin="3" CornerRadius="5">
                         <StackPanel>
                             <TextBlock Text="DEBUG" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="Black" FontWeight="Bold"/>
                             <material:MaterialButton x:Name="normals" Text="Normals" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
-                            <material:MaterialButton x:Name="concavity" Text="Concaveity" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
+                            <material:MaterialButton x:Name="convexity" Text="Convexity" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
                             <material:MaterialButton x:Name="direction" Text="Direction" Click="Draw" ShadowEnabled="True" Margin="3" CornerRadius="5" Background="#FFFF2626" Foreground="White" Width="180" Height="25" IsToggleButton="True"/>
                         </StackPanel>
                     </Border>

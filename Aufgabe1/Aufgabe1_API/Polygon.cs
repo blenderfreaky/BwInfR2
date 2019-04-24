@@ -8,6 +8,9 @@ namespace Aufgabe1_API
     {
         public Vertex[] vertices;
 
+        public int Length => vertices.Length;
+        public Vertex this[int index] => vertices[MathHelper.PositiveModulo(index, 0, Length)];
+
         public Polygon(Vector[] vertices)
         {
             this.vertices = new Vertex[vertices.Length];
@@ -18,18 +21,7 @@ namespace Aufgabe1_API
 
         protected bool FixDirection()
         {
-            /*Vertex max = vertices[0];
-
-            foreach (Vertex polygonVertex in vertices)
-            {
-                if (max.vector.y > polygonVertex.vector.y
-                    && max.vector.x <= polygonVertex.vector.x)
-                {
-                    max = polygonVertex;
-                }
-            }*/
-
-            Vertex max = vertices.MaxValue(Comparer<Vertex>.Create((a, b) => a.vector.y > b.vector.y && a.vector.x <= b.vector.x ? 1 : -1));
+            Vertex max = vertices.MaxValue((a, b) => a.vector.y > b.vector.y && a.vector.x <= b.vector.x ? 1 : -1);
 
             bool flipRequired = Vector.Orientation(max.Previous.vector, max.vector, max.Next.vector) == Vector.VectorOrder.Clockwise;
 
@@ -38,23 +30,6 @@ namespace Aufgabe1_API
         }
 
         public void Flip() => vertices = vertices.Reverse().Select(x => new Vertex(x.vector, this, vertices.Length - x.index - 1)).ToArray();
-
-        public int Length => vertices.Length;
-        public Vertex this[int index] => index < 0 ? this[index + Length] : vertices[index % Length];
-        public int this[Vector vec]
-        {
-            get
-            {
-                for (int i = 0; i < Length; i++) if (vertices[i].vector == vec) return i;
-                return -1;
-            }
-        }
-
-        public bool Intersects(Vector a, Vector b)
-        {
-            for (int i = 0; i < Length; i++) if (Vector.IntersectingLines(a, b, this[i].vector, this[i + 1].vector)) return true;
-            return false;
-        }
 
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<Vertex>)vertices).GetEnumerator();
         public IEnumerator<Vertex> GetEnumerator() => ((IEnumerable<Vertex>)vertices).GetEnumerator();

@@ -20,6 +20,7 @@ namespace Aufgabe1_GUI
     {
         private double off = 100000;
         private Map _map;
+        private Vertex startingPosition;
         public Map map
         {
             get => _map;
@@ -27,6 +28,7 @@ namespace Aufgabe1_GUI
             {
                 _map = value;
                 Back.Margin = new Thickness(off, off + map.allPolygonVertices.Average(x => x.vector.y) * 2, off, off);
+                startingPosition = _map.startingPosition;
             }
         }
 
@@ -65,14 +67,14 @@ namespace Aufgabe1_GUI
             Buspath.Children.Clear();
 
             Buspath.Children.Add(
-                new System.Windows.Shapes.Polygon
+                new System.Windows.Shapes.Polyline
                 {
                     Stroke = Brushes.Blue,
                     Fill = Brushes.Transparent,
                     StrokeThickness = 2,
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center,
-
+                    
                     Points = new PointCollection(map.busPath.Select(x => new Point(MathHelper.Clamp(x.x, -99999, 99999), -MathHelper.Clamp(x.y, -99999, 99999)))), //Values bigger than 199999 don't render properly
                 });
         }
@@ -86,11 +88,13 @@ namespace Aufgabe1_GUI
             if (mouseRayVertex.IsToggledOn) DrawVisibilityPolygonVertex();
             if (visibility.IsToggledOn) DrawVisibilityGraph();
             if (heuristic.IsToggledOn) DrawDijkstraHeuristic();
-            if (optimal.IsToggledOn) DrawOptimalPath(); else outputBorder.Visibility = Visibility.Collapsed;
+            if (optimal.IsToggledOn) DrawOptimalPathDefault(); 
+            if (fromMouse.IsToggledOn) DrawOptimalPathMouse();
+            if (!(optimal.IsToggledOn || fromMouse.IsToggledOn)) outputBorder.Visibility = Visibility.Collapsed;
 
             Vector Mix(Vertex vert, double length, double side) => vert.Next.vector - (vert.Next.vector - vert.vector).Let(x => x.Left * side + x).Normalize() * length;
             if (direction.IsToggledOn) Debugging.DrawLines(map.polygons.SelectMany(x => x.SelectMany(y => new[] { (y.vector, y.Next.vector), (y.Next.vector, Mix(y, 5, -1)), (y.Next.vector, Mix(y, 5, 1)) })), Brushes.Orange, 0.75);
-            if (concavity.IsToggledOn) Debugging.DrawLines(map.allPolygonVertices.Where(x => x.isConcave).Select(x => (x.vector - x.normal * 5, x.vector + x.normal * 5)), Brushes.Green, 0.75);
+            if (convexity.IsToggledOn) Debugging.DrawLines(map.allPolygonVertices.Where(x => !x.notConvex).Select(x => (x.vector - x.normal * 5, x.vector + x.normal * 5)), Brushes.Green, 0.75);
             if (normals.IsToggledOn) Debugging.DrawLines(map.allPolygonVertices.Select(x => (x.vector, x.vector + x.normal * 5)), Brushes.Blue, 0.75);
         }
 
@@ -117,23 +121,38 @@ namespace Aufgabe1_GUI
             .Distinct(), debug, redraw);
         private void DrawDijkstraHeuristic(bool redraw = true) =>
             DrawLines(map.GenerateDijkstraHeuristic(true, out _, out _, out var debug).Select(x => (x.Key.vector, x.Value.vector)), debug, redraw);
+        private void DrawOptimalPathDefault(bool redraw = true)
+        {
+            map.startingPosition = startingPosition;
+            DrawOptimalPath(redraw);
+        }
+        private void DrawOptimalPathMouse(bool redraw = true)
+        {
+            Point mousePositionPoint = Mouse.GetPosition(Navmap);
+            map.startingPosition = new Vertex(new Vector(mousePositionPoint.X, -mousePositionPoint.Y));
+            DrawOptimalPath(redraw);
+        }
         private void DrawOptimalPath(bool redraw = true)
         {
-            outputBorder.Visibility = Visibility.Visible;
+            try
+            {
+                outputBorder.Visibility = Visibility.Visible;
 
-            var optimalPath = map.GetOptimalPath(out double characterLength, out double busLength, out double advantage, out var debug);
-            List<(Vector, Vector)> vertices = new List<(Vector, Vector)>();
-            for (int i = 0; i < optimalPath.Count - 1; i++) vertices.Add((optimalPath[i].vector, optimalPath[i + 1].vector));
-            DrawLines(vertices, debug, redraw);
+                var optimalPath = map.GetOptimalPath(out double characterLength, out double busLength, out double advantage, out var debug);
+                List<(Vector, Vector)> vertices = new List<(Vector, Vector)>();
+                for (int i = 0; i < optimalPath.Count - 1; i++) vertices.Add((optimalPath[i].vector, optimalPath[i + 1].vector));
+                DrawLines(vertices, debug, redraw);
 
-            DateTime start = DateTime.Now.Let(x => new DateTime(x.Year, x.Month, x.Day, 7, 30, 0));
+                DateTime start = DateTime.Now.Let(x => new DateTime(x.Year, x.Month, x.Day, 7, 30, 0));
 
-            output.Text =
-@$"Startzeit: {(start - TimeSpan.FromSeconds(advantage)).ToLongTimeString()}
+                output.Text =
+    @$"Startzeit: {(start - TimeSpan.FromSeconds(advantage)).ToLongTimeString()}
 Ankunft: {(start + TimeSpan.FromSeconds(busLength / map.busSpeed)).ToLongTimeString()}
 Fahrzeit: {TimeSpan.FromSeconds(busLength / map.busSpeed).ToString(@"hh\:mm\:ss\.ffff")}
 Laufzeit: {TimeSpan.FromSeconds(characterLength / map.characterSpeed).ToString(@"hh\:mm\:ss\.ffff")}
 Weg: {string.Join("\n    => ", Enumerable.Reverse(optimalPath).Select(x => $"({x.vector.x.ToString("0.####")}, {x.vector.y.ToString("0.####")})"))}";
+            }
+            catch (Exception) { }
         }
 
         private void DrawLines(IEnumerable<(Vector, Vector)> vertices, IEnumerable<(Vector, Vector)> debug, bool redraw = true)
@@ -176,35 +195,42 @@ Weg: {string.Join("\n    => ", Enumerable.Reverse(optimalPath).Select(x => $"({x
         {
             if (mouseRay.IsToggledOn) Draw();
             if (mouseRayVertex.IsToggledOn) Draw();
+            if (fromMouse.IsToggledOn) Draw();
         }
 
         private void MouseRay_Click(object sender, RoutedEventArgs e)
         {
-            mouseRayVertex.IsToggledOn = visibility.IsToggledOn = heuristic.IsToggledOn = optimal.IsToggledOn = false;
+            mouseRayVertex.IsToggledOn = visibility.IsToggledOn = heuristic.IsToggledOn = optimal.IsToggledOn = fromMouse.IsToggledOn = false;
             Draw();
         }
 
         private void MouseRayVertex_Click(object sender, RoutedEventArgs e)
         {
-            mouseRay.IsToggledOn = visibility.IsToggledOn = heuristic.IsToggledOn = optimal.IsToggledOn = false;
+            mouseRay.IsToggledOn = visibility.IsToggledOn = heuristic.IsToggledOn = optimal.IsToggledOn = fromMouse.IsToggledOn = false;
             Draw();
         }
 
         private void Visibility_Click(object sender, RoutedEventArgs e)
         {
-            mouseRay.IsToggledOn = mouseRayVertex.IsToggledOn = heuristic.IsToggledOn = optimal.IsToggledOn = false;
+            mouseRay.IsToggledOn = mouseRayVertex.IsToggledOn = heuristic.IsToggledOn = optimal.IsToggledOn = fromMouse.IsToggledOn = false;
             Draw();
         }
 
         private void Heuristic_Click(object sender, RoutedEventArgs e)
         {
-            mouseRay.IsToggledOn = mouseRayVertex.IsToggledOn = visibility.IsToggledOn = optimal.IsToggledOn = false;
+            mouseRay.IsToggledOn = mouseRayVertex.IsToggledOn = visibility.IsToggledOn = optimal.IsToggledOn = fromMouse.IsToggledOn = false;
             Draw();
         }
 
         private void Optimal_Click(object sender, RoutedEventArgs e)
         {
-            mouseRay.IsToggledOn = mouseRayVertex.IsToggledOn = visibility.IsToggledOn = heuristic.IsToggledOn = false;
+            mouseRay.IsToggledOn = mouseRayVertex.IsToggledOn = visibility.IsToggledOn = heuristic.IsToggledOn = fromMouse.IsToggledOn = false;
+            Draw();
+        }
+
+        private void FromMouse_Click(object sender, RoutedEventArgs e)
+        {
+            mouseRay.IsToggledOn = mouseRayVertex.IsToggledOn = visibility.IsToggledOn = heuristic.IsToggledOn = optimal.IsToggledOn = false;
             Draw();
         }
     }

@@ -11,7 +11,7 @@ namespace Aufgabe1_API
         public readonly Polygon polygon;
         public readonly int index;
 
-        public bool isConcave;
+        public bool notConvex;
         public Vector normal;
 
         public Vertex(Vector vector)
@@ -19,7 +19,7 @@ namespace Aufgabe1_API
             this.vector = vector;
             polygon = null;
             index = 0;
-            isConcave = false;
+            notConvex = false;
             normal = null;
         }
 
@@ -28,14 +28,14 @@ namespace Aufgabe1_API
             this.vector = vector;
             this.polygon = polygon;
             this.index = index;
-            isConcave = false;
+            notConvex = false;
             normal = null;
         }
 
         public Vertex Init()
         {
-            isConcave = Vector.Orientation(Previous.vector, vector, Next.vector) == Vector.VectorOrder.Clockwise;
-            normal = isConcave
+            notConvex = Vector.Orientation(Previous.vector, vector, Next.vector) == Vector.VectorOrder.Clockwise;
+            normal = notConvex
                     ? ((Previous.vector - vector).Normalize() + (Next.vector - vector).Normalize())
                     : -((Previous.vector - vector).Normalize() + (Next.vector - vector).Normalize());
             return this;
@@ -46,23 +46,9 @@ namespace Aufgabe1_API
 
         public bool IsNeighbor(Vertex other) => Previous == other || Next == other;
 
-        // Assumes proper normals
-        public bool BehindNeighbors(Vector other)
-        {
-            bool enclosed = Vector.Orientation(vector, Previous.vector, other) == Vector.VectorOrder.Counterclockwise
-                          ^ Vector.Orientation(vector, Next.vector, other) == Vector.VectorOrder.Counterclockwise;
-            double dot = Vector.Dot(other - vector, normal);
-
-            return isConcave
-                    ? !enclosed || dot < 0
-                    : enclosed && dot < 0;
-        }
-
+        // Assumes notConvex to be properly calculated
         public bool BetweenNeighbors(Vector other) =>
-            !isConcave && (Vector.Orientation(vector, Previous.vector, other) != Vector.Orientation(Next.vector, vector, other));
-
-        public double Dot(Vertex other) => (Next.vector - vector).Normalize().Dot((other.Next.vector - other.vector).Normalize());
-        public double Dot(Vector start, Vector end) => (Next.vector - vector).Normalize().Dot((end - start).Normalize());
+            !notConvex && (Vector.Orientation(vector, Previous.vector, other) != Vector.Orientation(Next.vector, vector, other));
 
         public static bool operator ==(Vertex a, Vertex b) =>
               a.polygon == null || b.polygon == null

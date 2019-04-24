@@ -59,13 +59,17 @@ namespace Aufgabe1_API
             Clockwise = 0,
             Counterclockwise = 1,
         }
+        /// <summary>
+        /// Calculates the orientation of the triangle defined by a, b and c
+        /// </summary>
+        /// <returns>The Orientation of the triangle</returns>
         public static VectorOrder Orientation(Vector a, Vector b, Vector c)
         {
             double orientation = (c.y - a.y) * (b.x - a.x) - (b.y - a.y) * (c.x - a.x);
 
-            if (orientation < 00) return VectorOrder.Clockwise;
+            if (orientation <  0) return VectorOrder.Clockwise;
             if (orientation == 0) return VectorOrder.Collinear;
-            if (orientation > 00) return VectorOrder.Counterclockwise;
+            if (orientation >  0) return VectorOrder.Counterclockwise;
 
             throw new NotFiniteNumberException();
         }
@@ -91,7 +95,7 @@ namespace Aufgabe1_API
             VectorOrder sAeAeB = Orientation(startA, endA, endB);
 
             return (sAsBeB != eAsBeB && sAeAsB != sAeAeB)
-                  && !(sAeAeB == VectorOrder.Collinear || eAsBeB == VectorOrder.Collinear || sAeAsB == VectorOrder.Collinear || sAeAeB == VectorOrder.Collinear);
+                    && !(sAeAeB == VectorOrder.Collinear || eAsBeB == VectorOrder.Collinear || sAeAsB == VectorOrder.Collinear || sAeAeB == VectorOrder.Collinear);
         }
 
         public override bool Equals(object obj) => obj is Vector vec && vec.x == x && vec.y == y;

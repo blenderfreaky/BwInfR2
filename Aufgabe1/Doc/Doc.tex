@@ -52,10 +52,13 @@ Der optimale Weg zu diesen Eckpunkten lässt sich bestimmen mithilfe eines Sicht
 \renewcommand{\c}{c}
 
 \newcommand{\f}{f}
+\newcommand{\fzero}{f_0}
 
 \newcommand{\tf}{t(\f)}
+\newcommand{\tfzero}{t(\fzero)}
 \newcommand{\df}[1]{\frac{d#1}{d\f}}
 \newcommand{\dtf}{\df{\tf}}
+\newcommand{\dtfzero}{\df{\tfzero}}
 
 \begin{minipage}{0.8\textwidth}
 \includegraphics[scale=0.4]{CalcLabel}
@@ -86,19 +89,21 @@ Der Zeitvorteil durch eine angewinkelte Strecke ist die Differenz zwischen der Z
 \end{align*}
 \end{minipage}
 
+Extremstellen dieser Zeitdifferenz stellen die besten und schlechtesten Winkel für Lisas Strecke da.
 \begin{align*}
-&&\dtf &= 0\\
-\iff&&\a\left(\frac{f}{\vl\sqrt{1+\f^2}} - \frac{1}{\vb}\right) &= 0\\
-\iff&&\a\frac{f}{\vl\sqrt{1+\f^2}} &= \a\frac{1}{\vb}\\
-\iff&&\frac{f}{\sqrt{1+\f^2}} &= \frac{\vl}{\vb}\\
-\iff&&\left(\frac{f}{\sqrt{1+\f^2}}\right)^2 &= \left(\frac{\vl}{\vb}\right)^2\\
-\iff&&\frac{f^2}{1+\f^2} &= \frac{\vl^2}{\vb^2}\\
-\iff&&\frac{1+\f^2}{f^2} &= \frac{\vb^2}{\vl^2}\\
-\iff&&\frac{1}{f^2} &= \frac{\vb^2-\vl^2}{\vl^2}\\
-\iff&&f^2 &= \frac{\vl^2}{\vb^2-\vl^2}\\
-\iff&&f &= \sqrt{\frac{\vl^2}{\vb^2-\vl^2}}\\
-\iff&&f &= \frac{\vl}{\sqrt{\vb^2-\vl^2}}\\
+&&\dtfzero &= 0\\
+\iff&&\a\left(\frac{\fzero}{\vl\sqrt{1+\fzero^2}} - \frac{1}{\vb}\right) &= 0\\
+\iff&&\a\frac{\fzero}{\vl\sqrt{1+\fzero^2}} &= \a\frac{1}{\vb}\\
+\iff&&\frac{\fzero}{\sqrt{1+\f^2}} &= \frac{\vl}{\vb}\\
+\iff&&\left(\frac{\fzero}{\sqrt{1+\fzero^2}}\right)^2 &= \left(\frac{\vl}{\vb}\right)^2\\
+\iff&&\frac{\fzero^2}{1+\fzero^2} &= \frac{\vl^2}{\vb^2}\\
+\iff&&\frac{1+\fzero^2}{\fzero^2} &= \frac{\vb^2}{\vl^2}\\
+\iff&&\frac{1}{\fzero^2} &= \frac{\vb^2-\vl^2}{\vl^2}\\
+\iff&&\fzero^2 &= \frac{\vl^2}{\vb^2-\vl^2}\\
+\iff&&\fzero &= \sqrt{\frac{\vl^2}{\vb^2-\vl^2}}\\
+\iff&&\fzero &= \frac{\vl}{\sqrt{\vb^2-\vl^2}}\\
 \end{align*}
+Für die Standardwerte von Lisas Geschwindigkeit und der Busgeschwindigkeit, ist die Extremstelle $\fzero = \frac{1}{\sqrt{3}}$, wobei $\arctan(\fzero) = 30\degree$. Somit ist die optimale Strecke im 30\degree\ Winkel.
 
 \section{Umsetzung}
 Zur Umsetzung habe ich mich für eine Implementation in C\# entschieden, mit einer Visualisierung mithilfe von WPF.
@@ -123,7 +128,7 @@ boolean IsVisible(p) {
 \end{Csharp}
 
 \begin{minipage}{0.6\textwidth}
-P.BetweenNeighbours(A) gibt dabei zurück, ob für einen Punkt P der Teil eines Polygons ist ob A in dem in Abb. 1 grün markiertem Bereich liegt. Ist das Polygon in P konvex, so ist das Ergebnis immer false.
+P.BetweenNeighbours(A) gibt dabei zurück, ob für einen Punkt P der Teil eines Polygons ist ob A in dem in Abb. 1 grün markiertem Bereich liegt. Ist das Polygon in P nicht konvex, so ist das Ergebnis immer false.
 
 Wenn der Rückgabewert dieser Methode false ist, so sind in einem reduziertem Sichtbarkeitsgraph die beiden Punkte nicht verbunden.
 \end{minipage}\hspace{0.5cm}
@@ -188,21 +193,161 @@ Sobald die Heuristik fertig generiert ist, errechne mit dieser die optimale Stre
 \ExNoPage{0.74}{Ex5Result}{optimaler Weg}
 \end{center}
 
+\subsection{Beispiel 6}
+\begin{center}
+\Ex{0.45}{ExCGraph}{Sichtbarkeitsgraph}
+\Ex{0.45}{ExCHeuristic}{Dijkstra Heuristik}
+\Ex{0.45}{ExCResult}{optimaler Weg}\hspace{0.2cm}
+\begin{minipage}{0.48\textwidth}
+Dieses Beispiel ist eine Modifikation von Beispiel 5, bei der der Buspfad Um die Polygone herumgeht, und der Bus statt mit 30km/h mit 50km/h fährt.
+In der Datei: 
+\begin{Csharp}
+// Normale Datei wie vorgegeben
+// Buspfad angegeben wie Polygone, wobei inf und -inf positive und negative Unendlichkeit angeben
+/*Lisas Geschwindigkeit in km/h*/ /*Busgeschwindigkeit in km/h*/
+\end{Csharp}
+\end{minipage}
+\end{center}
+
 \section{Code}
 
 \begin{Csharp}[caption=Results]
+List<Vertex> optimalPath = map.GetOptimalPath(out double characterLength, out double busLength, out double advantage, out var debug);
+            
 DateTime start = DateTime.Now.Let(x => new DateTime(x.Year, x.Month, x.Day, 7, 30, 0));
 
 output.Text =
-@$"Startzeit: {(start - TimeSpan.FromSeconds(advantage))}
-Ankunft: {(start + TimeSpan.FromSeconds(busLength / map.busSpeed))}
-Fahrzeit: {TimeSpan.FromSeconds(busLength / map.busSpeed)}
-Laufzeit: {TimeSpan.FromSeconds(characterLength / map.characterSpeed)}
-Weg: {string.Join("=>", Enumerable.Reverse(optimalPath).Select(x => $"({x.vector.x}, {x.vector.y})"))}";
+@$"Startzeit:{(start - TimeSpan.FromSeconds(advantage))}
+Ankunft:{(start + TimeSpan.FromSeconds(busLength / map.busSpeed))}
+Fahrzeit:{TimeSpan.FromSeconds(busLength / map.busSpeed)}
+Laufzeit:{TimeSpan.FromSeconds(characterLength / map.characterSpeed)}
+Weg:{string.Join("=>", Enumerable.Reverse(optimalPath).Select(x => $"({x.vector.x}, {x.vector.y})"))}";
+\end{Csharp}
+
+\begin{Csharp}[caption=class Polygon]
+public Vertex[] vertices;
+public int Length => vertices.Length;
+public Vertex this[int index] => vertices[MathHelper.PositiveModulo(index, 0, Length)];
+
+// Polygons are always sorted to be Counterclockwise
+\end{Csharp}
+
+\begin{Csharp}[caption=class Vertex]
+public readonly Vector vector;
+public readonly Polygon polygon;
+public readonly int index;
+
+public bool notConvex;
+
+public Vertex Init()
+{
+    notConvex = Vector.Orientation(Previous.vector, vector, Next.vector) == Vector.VectorOrder.Clockwise; // Polygons are Counterclockwise
+    return this;
+}
+
+public Vertex Previous => polygon[index - 1];
+public Vertex Next => polygon[index + 1];
+
+public bool IsNeighbor(Vertex other) => Previous == other || Next == other;
+
+// Assumes notConvex to be properly calculated
+public bool BetweenNeighbors(Vector other) =>
+    !notConvex && (Vector.Orientation(vector, Previous.vector, other) != Vector.Orientation(Next.vector, vector, other));
+\end{Csharp}
+
+\begin{Csharp}[caption=class Vector]
+public double x, y;
+
+public Vector() { }
+
+public Vector(double angle) : this(Math.Cos(angle), Math.Sin(angle)) { }
+
+public Vector(double x, double y)
+{
+    this.x = x;
+    this.y = y;
+}
+
+public Vector Left => new Vector(-y, x);
+public Vector Right => new Vector(y, -x);
+public Vector Back => new Vector(-x, -y);
+
+// Algorithm from https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
+public enum VectorOrder : int
+{
+    Collinear = -1,
+    Clockwise = 0,
+    Counterclockwise = 1,
+}
+/// <summary>
+/// Calculates the orientation of the triangle defined by a, b and c
+/// </summary>
+public static VectorOrder Orientation(Vector a, Vector b, Vector c)
+{
+    double orientation = (c.y - a.y) * (b.x - a.x) - (b.y - a.y) * (c.x - a.x);
+
+    if (orientation <  0) return VectorOrder.Clockwise;
+    if (orientation == 0) return VectorOrder.Collinear;
+    if (orientation >  0) return VectorOrder.Counterclockwise;
+
+    throw new NotFiniteNumberException();
+}
+/// <summary>
+/// Like Orientation, but provides a margin for collinearity
+/// </summary>
+/// <param name="epsilon">The margin for collinearity</param>
+public static VectorOrder OrientationApprox(Vector a, Vector b, Vector c, double epsilon)
+{
+    double orientation = (c.y - a.y) * (b.x - a.x) - (b.y - a.y) * (c.x - a.x);
+
+    if (orientation < -epsilon) return VectorOrder.Clockwise;
+    if (orientation > epsilon) return VectorOrder.Counterclockwise;
+
+    if (double.IsNaN(orientation)) throw new NotFiniteNumberException();
+    return VectorOrder.Collinear;
+}
+public static bool IntersectingLines(Vector startA, Vector endA, Vector startB, Vector endB)
+{
+    VectorOrder sAsBeB = Orientation(startA, startB, endB);
+    VectorOrder eAsBeB = Orientation(endA, startB, endB);
+    VectorOrder sAeAsB = Orientation(startA, endA, startB);
+    VectorOrder sAeAeB = Orientation(startA, endA, endB);
+
+    return (sAsBeB != eAsBeB && sAeAsB != sAeAeB)
+            && !(sAeAeB == VectorOrder.Collinear || eAsBeB == VectorOrder.Collinear || sAeAsB == VectorOrder.Collinear || sAeAeB == VectorOrder.Collinear);
+}
+\end{Csharp}
+
+\begin{Csharp}[caption=class Helper]
+public static int PositiveModulo(int value, int offset, int length)
+{
+    while (value < offset) value += length;
+    while (value >= offset + length) value -= length;
+    return value;
+}
+public static double PositiveModulo(double value, double offset, double length)
+{
+    while (value < offset) value += length;
+    while (value >= offset + length) value -= length;
+    return value;
+}
+public static double ModuloAngle(double angle) => PositiveModulo(angle, 0, 2 * Math.PI);
+
+public static double Clamp(double value, double min, double max) => value < min ? min : value > max ? max : value;
+
+public static bool Approx(this double first, double second, double epsilon) => Math.Abs(first - second) < epsilon;
+public static bool Approx(this Vector first, Vector second, double epsilonSquared) => first.DistanceSquared(second) < epsilonSquared;
+
+public static (T1 value, T2 comparable) MinValue<T1, T2>(this IEnumerable<T1> enumerable, Func<T1, T2> selector) where T2 : IComparable<T2>
+// Returns the element with the lowest return value selector(x) out of an enumerable, along with that return value
+public static T MaxValue<T>(this IEnumerable<T> enumerable, Comparison<T> comparer)
+// Returns the element with the highest element out of an enumerable, as defined by the given comparer
+
+public static T2 Let<T1, T2>(this T1 obj, Func<T1, T2> func) => func(obj);
+public static void Let<T>(this T obj, Action<T> action) => action(obj);
 \end{Csharp}
 
 \begin{Csharp}[caption=class Map]
-\begin{Csharp}
 public Polygon[] polygons;
 public Vector[] busPath;
 public Vertex startingPosition;
@@ -219,25 +364,24 @@ public void SetSpeed(double characterSpeed, double busSpeed)
 public IEnumerable<Vector> GetEndpoints(Vector dot)
 // Returns all endpoints of the direct paths (30 degree angle) from the given Vector to the bus path
 
-public double GetBusLength(Vector vec)
-// Calculates the distance the bus drives to reach a given point on its track
-
 public double CalculateDistanceAtAngle(Vertex vertex, Vector origin, double angle)
 // Calculates the distance from origin to the intersection between a ray from origin with a given angle, and the line containing vertex and vertex.Next
 
 public double epsilon = 1E-15;
 
-public List<Vertex> GenerateVisibilityPolygon(Vertex originVertex, out List<Vertex> endpoints, out List<(Vector, Vector)> debug)
+public List<Vertex> GenerateVisibilityPolygon(Vertex originVertex, out List<(Vertex vert, double busLength)> endpoints, out List<(Vector, Vector)> debug)
 {
+    List<(Vector, Vector)> debugOut = new List<(Vector, Vector)>();
+
     Vector origin = originVertex.vector;
 
     List<Vertex> visibilityGraph = new List<Vertex>();
     List<Vertex> allPolygonVertices = this.allPolygonVertices.Where(x => !x.vector.Approx(origin, epsilon)).ToList();
 
-    endpoints = GetEndpoints(origin).Select(x => new Vertex(x)).ToList();
+    endpoints = GetEndpoints(origin).ToList();
     Dictionary<Vertex, double> angles =
         allPolygonVertices
-        .Concat(endpoints)
+        .Concat(endpoints.Select(x => x.Item1))
         .ToDictionary(x => x, x => x.vector.Angle(origin));
 
     // Edges are stored as the vertex with the lower index of the two defining vertices
@@ -412,26 +556,50 @@ public List<Vertex> GenerateVisibilityPolygon(Vertex originVertex, out List<Vert
     }
 
     var polygon = visibilityGraph.Distinct().ToList();
+    debug = debugOut;
     return polygon;
 }
 
-public Dictionary<Vertex, Vertex> GenerateDijkstraHeuristic(bool reduced, out Dictionary<Vertex, Dictionary<Vertex, double>> visitedNodes, out List<Vertex> endpoints)
+public Dictionary<Vertex, List<Vertex>> GenerateVisibilityGraph(out List<(Vertex vert, double busLength)> endpoints, out List<(Vector, Vector)> debug)
+{
+    var debugOut = new List<(Vector, Vector)>();
+    var endpointsOut = new List<(Vertex vert, double busLength)>();
+    var graph =
+        allPolygonVertices
+        .Concat(new[] { startingPosition })
+        .ToDictionary(x => x, x =>
+        {
+            var polygon = GenerateVisibilityPolygon(x, out var newEndpoints, out var newDebug);
+            debugOut.AddRange(newDebug);
+            endpointsOut.AddRange(newEndpoints);
+            return polygon;
+        });
+
+    debug = debugOut;
+    endpoints = endpointsOut;
+    return graph;
+}
+
+public Dictionary<Vertex, Vertex> GenerateDijkstraHeuristic(bool reduced, out Dictionary<Vertex, Dictionary<Vertex, double>> visitedNodes, out List<(Vertex vert, double busLength)> endpoints, out List<(Vector, Vector)> debug)
 {
     List<Vertex> allVertices = allPolygonVertices.Concat(new[] { startingPosition }).ToList();
 
-    var endpointsOut = new List<Vertex>();
+    var debugOut = new List<(Vector, Vector)>();
+    var endpointsOut = new List<(Vertex vert, double busLength)>();
 
     Dictionary<Vertex, Func<Dictionary<Vertex, double>>> graph =
         allVertices.ToDictionary(x => x, x =>
         (Func<Dictionary<Vertex, double>>)(() =>
             {
-                var polygon = GenerateVisibilityPolygon(x, out var newEndpoints);
+                var polygon = GenerateVisibilityPolygon(x, out var newEndpoints, out var newDebug);
+                debugOut.AddRange(newDebug);
                 endpointsOut.AddRange(newEndpoints);
                 return polygon.ToDictionary(y => y, y => y.vector.Distance(x.vector));
             }
         ));
 
-    var dijkstra = Dijkstra.GenerateDijkstraHeuristicLazy(startingPosition, graph, endpointsOut, out visitedNodes);
+    var dijkstra = Dijkstra.GenerateDijkstraHeuristicLazy(startingPosition, graph, endpointsOut.Select(x => x.vert).ToList(), out visitedNodes);
+    debug = debugOut;
     endpoints = endpointsOut;
     return dijkstra;
 }
@@ -441,9 +609,9 @@ public List<Vertex> GetOptimalPath(out double characterLength, out double busLen
     var heuristic = GenerateDijkstraHeuristic(true, out var visitedNodes, out var endpoints, out debug);
 
     IEnumerable<(Vertex vert, double characterLength, double busLength)> times = endpoints
-        .Where(x => heuristic.ContainsKey(x))
+        .Where(x => heuristic.ContainsKey(x.vert))
         .Select(x => 
-            (x, Dijkstra.GetPathLength(startingPosition, x, heuristic, visitedNodes), GetBusLength(x.vector)));
+            (x.vert, Dijkstra.GetPathLength(startingPosition, x.vert, heuristic, visitedNodes), x.busLength));
 
     Vertex min;
     ((min, characterLength, busLength), advantage) = times.MinValue(x => x.characterLength / characterSpeed - x.busLength / busSpeed);

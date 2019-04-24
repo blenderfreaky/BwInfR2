@@ -6,12 +6,19 @@ namespace Aufgabe1_API
 {
     public static class MathHelper
     {
-        public static double ModuloAngle(double angle)
+        public static int PositiveModulo(int value, int offset, int length)
         {
-            while (angle < 0) angle += Math.PI * 2;
-            while (angle >= Math.PI * 2) angle -= Math.PI * 2;
-            return angle;
+            while (value < offset) value += length;
+            while (value >= offset + length) value -= length;
+            return value;
         }
+        public static double PositiveModulo(double value, double offset, double length)
+        {
+            while (value < offset) value += length;
+            while (value >= offset + length) value -= length;
+            return value;
+        }
+        public static double ModuloAngle(double angle) => PositiveModulo(angle, 0, 2 * Math.PI);
 
         public static double SmallerAngleSide(double angle) => Math.Min(ModuloAngle(angle), ModuloAngle(2 * Math.PI - angle));
         public static int GetAngleSide(double angle1, double angle2) => ModuloAngle(angle2 - angle1) == 0 ? 0 : ModuloAngle(angle2 - angle1).CompareTo(Math.PI);
@@ -65,6 +72,18 @@ namespace Aufgabe1_API
         {
             T max = enumerable.First();
             foreach (T elem in enumerable) if (comparer.Compare(elem, max) > 0) max = elem;
+            return max;
+        }
+        public static T MinValue<T>(this IEnumerable<T> enumerable, Comparison<T> comparer)
+        {
+            T min = enumerable.First();
+            foreach (T elem in enumerable) if (comparer(elem, min) < 0) min = elem;
+            return min;
+        }
+        public static T MaxValue<T>(this IEnumerable<T> enumerable, Comparison<T> comparer)
+        {
+            T max = enumerable.First();
+            foreach (T elem in enumerable) if (comparer(elem, max) > 0) max = elem;
             return max;
         }
         public static T2 Let<T1, T2>(this T1 obj, Func<T1, T2> func) => func(obj);
