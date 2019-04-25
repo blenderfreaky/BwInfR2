@@ -23,14 +23,19 @@ namespace Aufgabe2
     /// </summary>
     public partial class MainWindow : MaterialWindow
     {
+        private double off = 100000;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            Off.Margin = new Thickness(-off);
+            Back.Margin = new Thickness(off, off + 50, off, off);
         }
 
         public void Draw()
         {
-            Draw(new[] { new Triangle(new TriangleArchetype(new Triangle(new Vector(0, 0), new Vector(1, 1), new Vector(2, 0))), new Vector(), 0) }.ToList(), new List<(Vector, Vector)>());
+            Draw(new[] { new Triangle(new TriangleArchetype(new Triangle(new Vector(0, 0), new Vector(1, 1), new Vector(2, 0))), new Vector(2, 1), 1) }.ToList(), new List<(Vector, Vector)>());
             List<TriangleArchetype> triangleArchetypes = new List<TriangleArchetype>();
             //Draw(TriangleArranger.ArrangeTriangles(triangleArchetypes, out var debug), debug);
         }

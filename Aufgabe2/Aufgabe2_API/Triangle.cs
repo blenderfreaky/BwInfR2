@@ -49,8 +49,8 @@ namespace Aufgabe2_API
         public Triangle(TriangleArchetype archetype, Vector positionOffset, double angleOffset)
         {
             a = positionOffset;
-            b = a + new Vector(archetype.angles[0] + angleOffset) * archetype.lengths[0];
-            c = b + new Vector(archetype.angles[0] - archetype.angles[1] + angleOffset) * archetype.lengths[1];
+            b = a + new Vector(archetype.angles[1] + angleOffset) * archetype.lengths[0];
+            c = b + new Vector(Math.PI + archetype.angles[2] + archetype.angles[1] + angleOffset) * archetype.lengths[1];
             Debug.Assert(a.Approx(c + new Vector(archetype.angles[0] + archetype.angles[1] + archetype.angles[2] + angleOffset) * archetype.lengths[2], 1E-10));
         }
     }

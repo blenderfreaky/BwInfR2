@@ -17,9 +17,9 @@
 \DeclarePairedDelimiter\brackets{(}{)}
 
 %TODO
-\title{\vspace{-2.0cm}Aufgabe 1}
-\author{Nikolas Kilian}
-\date{8. März 2019}
+\title{\vspace{-2.0cm}Aufgabe 1: Lisa rennt}
+\author{Teilnahme ID: 48313\\Nikolas Kilian}
+\date{\today}
 
 \usepackage{Csharp}
 \usepackage{lastpage}
@@ -30,10 +30,12 @@
 \let\runauthor\@author
 \makeatother
 \lhead{\runauthor}
-\cfoot{\thepage\ von \pageref{LastPage}}
+\fancyhead[R]{Aufgabe 1: Lisa rennt\\\leftmark}
+\cfoot{\thepage\ / \pageref{LastPage}}
 
 \begin{document}
 \maketitle
+\tableofcontents
 
 \section{Lösungsidee}
 Wenn es keine Hindernisse gibt, so ist der optimale Weg eine gerade Strecke vom Startpunkt zum Buspfad im 30\degree\ Winkel. Für Begründung davon siehe 1.1.\\
@@ -72,6 +74,7 @@ Der optimale Weg zu diesen Eckpunkten lässt sich bestimmen mithilfe eines Sicht
 \begin{minipage}{0.45\textwidth}
 Der Zeitvorteil durch eine angewinkelte Strecke ist die Differenz zwischen der Zeit die Lisa braucht für ihre Extrastrecke, und die Zeit die der Bus mehr fährt.
 
+\vspace{1cm}
 \begin{align*}
 \tf &= \frac{\c-\a}{\vl} - \frac{\b}{\vb}\\
 &= \frac{\sqrt{\a^2+\b^2}-\a}{\vl} - \frac{\a\f}{\vb}\\
@@ -89,6 +92,7 @@ Der Zeitvorteil durch eine angewinkelte Strecke ist die Differenz zwischen der Z
 \end{align*}
 \end{minipage}
 
+\newpage
 Extremstellen dieser Zeitdifferenz stellen die besten und schlechtesten Winkel für Lisas Strecke da.
 \begin{align*}
 &&\dtfzero &= 0\\
@@ -162,21 +166,21 @@ Sobald die Heuristik fertig generiert ist, errechne mit dieser die optimale Stre
 \begin{center}
 \Ex{0.35}{Ex1Graph}{Sichtbarkeitsgraph}
 \Ex{0.35}{Ex1Heuristic}{Dijkstra Heuristik}
-\ExNoPage{0.7}{Ex1Result}{optimaler Weg}
+\ExNoPage{0.55}{Ex1Result}{optimaler Weg}
 \end{center}
 
 \subsection{Beispiel 2}
 \begin{center}
 \Ex{0.45}{Ex2Graph}{Sichtbarkeitsgraph}
 \Ex{0.45}{Ex2Heuristic}{Dijkstra Heuristik}
-\ExNoPage{0.9}{Ex2Result}{optimaler Weg}
+\ExNoPage{0.7}{Ex2Result}{optimaler Weg}
 \end{center}
 
 \subsection{Beispiel 3}
 \begin{center}
 \Ex{0.42}{Ex3Graph}{Sichtbarkeitsgraph}
 \Ex{0.42}{Ex3Heuristic}{Dijkstra Heuristik}
-\ExNoPage{0.85}{Ex3Result}{optimaler Weg}
+\ExNoPage{0.7}{Ex3Result}{optimaler Weg}
 \end{center}
 
 \subsection{Beispiel 4}
@@ -188,16 +192,16 @@ Sobald die Heuristik fertig generiert ist, errechne mit dieser die optimale Stre
 
 \subsection{Beispiel 5}
 \begin{center}
-\Ex{0.4}{Ex5Graph}{Sichtbarkeitsgraph}
-\Ex{0.4}{Ex5Heuristic}{Dijkstra Heuristik}
-\ExNoPage{0.74}{Ex5Result}{optimaler Weg}
+\Ex{0.44}{Ex5Graph}{Sichtbarkeitsgraph}
+\Ex{0.44}{Ex5Heuristic}{Dijkstra Heuristik}
+\ExNoPage{0.68}{Ex5Result}{optimaler Weg}
 \end{center}
 
 \subsection{Beispiel 6}
 \begin{center}
 \Ex{0.45}{ExCGraph}{Sichtbarkeitsgraph}
 \Ex{0.45}{ExCHeuristic}{Dijkstra Heuristik}
-\Ex{0.45}{ExCResult}{optimaler Weg}\hspace{0.2cm}
+\Ex{0.44}{ExCResult}{optimaler Weg}\hspace{0.2cm}
 \begin{minipage}{0.48\textwidth}
 Dieses Beispiel ist eine Modifikation von Beispiel 5, bei der der Buspfad Um die Polygone herumgeht, und der Bus statt mit 30km/h mit 50km/h fährt.
 In der Datei: 
@@ -208,6 +212,8 @@ In der Datei:
 \end{Csharp}
 \end{minipage}
 \end{center}
+
+\newpage
 
 \section{Code}
 
