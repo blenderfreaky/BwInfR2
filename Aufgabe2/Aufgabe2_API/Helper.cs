@@ -6,14 +6,22 @@ namespace Aufgabe2_API
 {
     public static class MathHelper
     {
-        public static double ModuloAngle(double angle)
+        public static int PositiveModulo(int value, int offset, int length)
         {
-            while (angle < 0) angle += Math.PI * 2;
-            while (angle >= Math.PI * 2) angle -= Math.PI * 2;
-            return angle;
+            while (value < offset) value += length;
+            while (value >= offset + length) value -= length;
+            return value;
         }
+        public static double PositiveModulo(double value, double offset, double length)
+        {
+            while (value < offset) value += length;
+            while (value >= offset + length) value -= length;
+            return value;
+        }
+        public static double ModuloAngle(double angle) => PositiveModulo(angle, 0, 2 * Math.PI);
+        public static double ModuloHalfAngle(double angle) => PositiveModulo(angle, 0, Math.PI);
 
-        public static double SmallerAngleSide(double angle) => Math.Min(ModuloAngle(angle), ModuloAngle(2*Math.PI - angle));
+        public static double SmallerAngleSide(double angle) => Math.Min(ModuloAngle(angle), ModuloAngle(-angle));
         public static int GetAngleSide(double angle1, double angle2) => ModuloAngle(angle2 - angle1) == 0 ? 0 : ModuloAngle(angle2 - angle1).CompareTo(Math.PI);
         public static double Clamp(double value, double min, double max) => value < min ? min : value > max ? max : value;
 

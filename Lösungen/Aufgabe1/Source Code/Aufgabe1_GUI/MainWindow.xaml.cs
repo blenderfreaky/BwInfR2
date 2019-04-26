@@ -35,9 +35,8 @@ namespace Aufgabe1_GUI
         public MainWindow()
         {
             InitializeComponent();
-
-            string root = "../../../../Examples/Aufgabe1/";
-            map = new Map(File.ReadAllLines(root + "lisarennt1.txt"));
+            
+            map = new Map(File.ReadAllLines(examplesPath + "lisarennt1.txt"));
 
             Off.Margin = new Thickness(-off);
         }
@@ -146,7 +145,7 @@ namespace Aufgabe1_GUI
                 DateTime start = DateTime.Now.Let(x => new DateTime(x.Year, x.Month, x.Day, 7, 30, 0));
 
                 output.Text =
-    @$"Startzeit: {(start - TimeSpan.FromSeconds(advantage)).ToLongTimeString()}
+$@"Startzeit: {(start - TimeSpan.FromSeconds(advantage)).ToLongTimeString()}
 Ankunft: {(start + TimeSpan.FromSeconds(busLength / map.busSpeed)).ToLongTimeString()}
 Fahrzeit: {TimeSpan.FromSeconds(busLength / map.busSpeed).ToString(@"hh\:mm\:ss\.ffff")}
 Laufzeit: {TimeSpan.FromSeconds(characterLength / map.characterSpeed).ToString(@"hh\:mm\:ss\.ffff")}
@@ -170,8 +169,10 @@ Weg: {string.Join("\n    => ", Enumerable.Reverse(optimalPath).Select(x => $"({x
         private void OpenAdvanced_Click(object sender, RoutedEventArgs e) => AdvancedOptions.Visibility = Visibility.Visible;
         private void CloseAdvanced_Click(object sender, RoutedEventArgs e) => AdvancedOptions.Visibility = Visibility.Collapsed;
 
-        private static readonly string examplesPath = 
-            Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Directory.GetCurrentDirectory()), "../../../Examples/Aufgabe1/"));
+        private static readonly string examplesPath =
+            Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Directory.GetCurrentDirectory()), "../../../Beispiele/")).Let(x =>
+            Directory.Exists(x) ? x : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Directory.GetCurrentDirectory()), "Aufgabe1/Beispiele/")).Let(y =>
+            Directory.Exists(y) ? y : "C:"));
         private void Open_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog diag = new OpenFileDialog

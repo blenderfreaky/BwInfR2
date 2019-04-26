@@ -1,7 +1,10 @@
 ﻿using Aufgabe2_API;
 using MaterialDesign2.Controls;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Path = System.IO.Path;
 using Vector = Aufgabe2_API.Vector;
 
 namespace Aufgabe2
@@ -24,6 +28,7 @@ namespace Aufgabe2
     public partial class MainWindow : MaterialWindow
     {
         private double off = 100000;
+        private double scale = 1;
 
         public MainWindow()
         {
@@ -31,13 +36,27 @@ namespace Aufgabe2
 
             Off.Margin = new Thickness(-off);
             Back.Margin = new Thickness(off, off + 50, off, off);
+
+            Draw(File.ReadAllLines(examplesPath + "dreiecke1.txt"));
         }
 
-        public void Draw()
+        public void Draw(string[] lines)
         {
-            Draw(new[] { new Triangle(new TriangleArchetype(new Triangle(new Vector(0, 0), new Vector(1, 1), new Vector(2, 0))), new Vector(2, 1), 1) }.ToList(), new List<(Vector, Vector)>());
-            List<TriangleArchetype> triangleArchetypes = new List<TriangleArchetype>();
-            //Draw(TriangleArranger.ArrangeTriangles(triangleArchetypes, out var debug), debug);
+            int triangleCount = int.Parse(lines[0]);
+            TriangleArchetype[] archetypes = new TriangleArchetype[triangleCount];
+
+            for (int i = 0; i < triangleCount; i++)
+            {
+                double[] triangle = lines[i + 1].Split().Select(x => double.Parse(x)).ToArray();
+                Debug.Assert(triangle[0] == 3);
+                var vertices = new Vector[3];
+
+                for (int j = 0; j < triangle[0]; j++) vertices[j] = new Vector(triangle[j * 2 + 1], triangle[j * 2 + 2]);
+
+                archetypes[i] = new TriangleArchetype(new Triangle(vertices[0], vertices[1], vertices[2]));
+            }
+
+            Draw(TriangleArranger.ArrangeTriangles(archetypes.ToList(), out var debug), debug);
         }
 
         public void Draw(List<Triangle> triangles, List<(Vector, Vector)> debug)
@@ -56,11 +75,11 @@ namespace Aufgabe2
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Center,
 
-                        X1 = t.a.x,
-                        Y1 = -t.a.y,
+                        X1 = t.a.x * scale,
+                        Y1 = -t.a.y * scale,
 
-                        X2 = t.b.x,
-                        Y2 = -t.b.y,
+                        X2 = t.b.x * scale,
+                        Y2 = -t.b.y * scale,
                     }
                 );
                 Triangles.Children.Add(
@@ -72,11 +91,11 @@ namespace Aufgabe2
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Center,
 
-                        X1 = t.b.x,
-                        Y1 = -t.b.y,
+                        X1 = t.b.x * scale,
+                        Y1 = -t.b.y * scale,
 
-                        X2 = t.c.x,
-                        Y2 = -t.c.y,
+                        X2 = t.c.x * scale,
+                        Y2 = -t.c.y * scale,
                     }
                 );
                 Triangles.Children.Add(
@@ -88,11 +107,11 @@ namespace Aufgabe2
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Center,
 
-                        X1 = t.c.x,
-                        Y1 = -t.c.y,
+                        X1 = t.c.x * scale,
+                        Y1 = -t.c.y * scale,
 
-                        X2 = t.a.x,
-                        Y2 = -t.a.y,
+                        X2 = t.a.x * scale,
+                        Y2 = -t.a.y * scale,
                     }
                 );
             }
@@ -117,14 +136,34 @@ namespace Aufgabe2
             }
         }
 
+        private static readonly string examplesPath =
+            Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Directory.GetCurrentDirectory()), "../../../Beispiele/")).Let(x =>
+            Directory.Exists(x) ? x : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Directory.GetCurrentDirectory()), "Aufgabe2/Beispiele/")).Let(y =>
+            Directory.Exists(y) ? y : "C:"));
+        private void Open_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog diag = new OpenFileDialog
+            {
+                InitialDirectory = examplesPath,
+                CustomPlaces = new[] { new FileDialogCustomPlace(examplesPath) }.ToList(),
+                CheckFileExists = true,
+                CheckPathExists = true,
+            };
+
+            if (diag.ShowDialog() == true)
+            {
+                Draw(File.ReadAllLines(diag.FileName));
+            }
+        }
+
         private void Triangles_Loaded(object sender, RoutedEventArgs e)
         {
-            Draw();
+
         }
 
         private void Debugging_Loaded(object sender, RoutedEventArgs e)
         {
-            Draw();
+
         }
     }
 }

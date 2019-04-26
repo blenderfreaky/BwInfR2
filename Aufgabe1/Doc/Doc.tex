@@ -16,7 +16,6 @@
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}
 \DeclarePairedDelimiter\brackets{(}{)}
 
-%TODO
 \title{\vspace{-2.0cm}Aufgabe 1: Lisa rennt}
 \author{Teilnahme ID: 48313\\Nikolas Kilian}
 \date{\today}
@@ -71,6 +70,7 @@ Der optimale Weg zu diesen Eckpunkten lässt sich bestimmen mithilfe eines Sicht
 \[\f:=\frac{\b}{\a}\]%\b=\a\f\]
 \end{minipage}
 
+\vspace{1cm}
 \begin{minipage}{0.45\textwidth}
 Der Zeitvorteil durch eine angewinkelte Strecke ist die Differenz zwischen der Zeit die Lisa braucht für ihre Extrastrecke, und die Zeit die der Bus mehr fährt.
 
@@ -111,7 +111,7 @@ Für die Standardwerte von Lisas Geschwindigkeit und der Busgeschwindigkeit, ist
 
 \section{Umsetzung}
 Zur Umsetzung habe ich mich für eine Implementation in C\# entschieden, mit einer Visualisierung mithilfe von WPF.
-Für die Generierung von Sichtbarkeitspolygonen verwende ich eine Implementation des Sweep-Line Algorithmus [Sources here]. Die Version des Algorithmus die ich verwende funktioniert wie folgt:
+Für die Generierung von Sichtbarkeitspolygonen verwende ich eine Implementation des Sweep-Line Algorithmus\footnote{http://cs.smith.edu/~istreinu/Teaching/Courses/274/Spring98/Projects/Philip/fp/algVisibility.htm}. Die Version des Algorithmus die ich verwende funktioniert wie folgt:
 \begin{Csharp}
 Let Intersections = Binary Search Tree, sorted by the order of intersection
 
@@ -150,6 +150,24 @@ Mit dem Sichtbarkeitsgraphen fertig genreriere ich nun eine Heuristik mit Dijkst
 Da Dijkstra's Algorithmus nicht immer alle Knoten besucht, muss der Sichtbarkeitsgraph auch nicht vollständig generiert werden. Um dies auszunutzen berechne ich das Sichtbarkeitspolygon nur für Punkte die Dijkstra besucht.
 
 Sobald die Heuristik fertig generiert ist, errechne mit dieser die optimale Strecke zu allen Endpunkten und die Zeit die Lisa braucht um diese abzulaufen, und die Zeit die der Bus braucht, um dorthin zu kommen. Damit errechne ich die Zeit zu der Lisa losgehen muss für alle diese Wege, vergleiche diese und nehme den Weg mit der spätesten Startezeit. Dieser Weg ist der optimale Weg, und somit das Ergebnis.
+
+\newpage
+\subsection{Komplexität}
+\newcommand{\bigO}{\mathcal{O}}
+\newcommand{\n}{n}
+\newcommand{\m}{\large\vert}
+\newcommand{\spacer}{$\quad$}
+Gesamt \spacer $\bigO(\n^2\log\n + \n^2x)$, $x$ ist die Anzahl an Geraden, die 3 oder mehr Ecken der Polygone enthalten \\
+$\m$Sichtbarkeitsgraph \spacer $\bigO(\n^2\log\n + \n^2x)$ \\
+$\m\m$Sichtbarkeitspolygon \spacer $\bigO(\n\log\n + \n y)$, $y$ ist die Anzahl an Geraden, die den Ursprung des Sichtbarkeitspolygons und 2 oder mehr andere Ecken der Polygone enthalten \\
+$\m\m\m$Sortieren der Eckpunkte \spacer $\bigO(\n\log\n)$ \\
+$\m\m\m$Iterieren der Eckpunkte \spacer $\bigO(\n + \n y)$ \\
+$\m\m\m\m$Entfernen aus den Binären Suchbaum \spacer $\bigO(\log\n)$ \\
+$\m\m\m\m$Sichtbarkeitscheck \spacer $\bigO(\log\n + y)$ \\
+$\m\m\m\m\m$Schnittpunktscheck mit erstem Element des Suchbaums \spacer $\bigO(\log\n)$ \\
+$\m\m\m\m\m$Check nach unendlich dünnen Wegen \spacer $\bigO(y)$ \\
+$\m\m\m\m$Einfügen in den Binären Suchbaum \spacer $\bigO(\log\n)$ \\
+$\m$Dijkstras Algorithmus \spacer $\bigO(|E|+|V|\log |V|)$ \\
 
 \newcommand{\ExNoPage}[3]{
 \frame{\includegraphics[scale=#1]{#2}}
@@ -223,7 +241,7 @@ List<Vertex> optimalPath = map.GetOptimalPath(out double characterLength, out do
 DateTime start = DateTime.Now.Let(x => new DateTime(x.Year, x.Month, x.Day, 7, 30, 0));
 
 output.Text =
-@$"Startzeit:{(start - TimeSpan.FromSeconds(advantage))}
+$@"Startzeit:{(start - TimeSpan.FromSeconds(advantage))}
 Ankunft:{(start + TimeSpan.FromSeconds(busLength / map.busSpeed))}
 Fahrzeit:{TimeSpan.FromSeconds(busLength / map.busSpeed)}
 Laufzeit:{TimeSpan.FromSeconds(characterLength / map.characterSpeed)}
