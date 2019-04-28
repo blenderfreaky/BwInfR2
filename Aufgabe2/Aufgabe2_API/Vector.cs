@@ -4,6 +4,8 @@ namespace Aufgabe2_API
 {
     public class Vector : IComparable<Vector>
     {
+        public static readonly Vector Zero = new Vector();
+        public static readonly Vector One = new Vector(1, 1);
         public double x, y;
 
         public Vector() { }

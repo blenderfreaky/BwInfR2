@@ -1,21 +1,12 @@
 ﻿using Aufgabe2_API;
 using MaterialDesign2.Controls;
 using Microsoft.Win32;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Path = System.IO.Path;
 using Vector = Aufgabe2_API.Vector;
@@ -35,7 +26,7 @@ namespace Aufgabe2
             InitializeComponent();
 
             Off.Margin = new Thickness(-off);
-            Back.Margin = new Thickness(off, off + 50, off, off);
+            Back.Margin = new Thickness(off, off + 200, off, off);
 
             Draw(File.ReadAllLines(examplesPath + "dreiecke1.txt"));
         }
@@ -56,7 +47,12 @@ namespace Aufgabe2
                 archetypes[i] = new TriangleArchetype(new Triangle(vertices[0], vertices[1], vertices[2]));
             }
 
-            Draw(TriangleArranger.ArrangeTriangles(archetypes.ToList(), out var debug), debug);
+            var triangles = TriangleArranger.ArrangeTriangles(archetypes.ToList(), out var order, out var debug);
+            Draw(triangles, debug);
+
+            output.Text = $@"Länge: {TriangleArranger.SortedLength(triangles).ToString("0.####")}
+Dreiecke: 
+{string.Join("\n", triangles.Select(x => $"{order[x]}: ({x.a.x.ToString("0.####")}, {x.a.y.ToString("0.####")}), ({x.b.x.ToString("0.####")}, {x.b.y.ToString("0.####")}), ({x.c.x.ToString("0.####")}, {x.c.y.ToString("0.####")})"))}";
         }
 
         public void Draw(List<Triangle> triangles, List<(Vector, Vector)> debug)

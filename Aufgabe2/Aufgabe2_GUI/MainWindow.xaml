@@ -6,16 +6,23 @@
         xmlns:local="clr-namespace:Aufgabe2"
         xmlns:material="clr-namespace:MaterialDesign2.Controls;assembly=MaterialDesign2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Aufgabe 2" Height="450" Width="800">
     <Grid>
         <material:PanBorder>
             <Grid x:Name="Off" Background="White">
                 <Grid x:Name="Back">
                     <Canvas x:Name="Triangles" Margin="0" Loaded="Triangles_Loaded"/>
                     <Canvas x:Name="Debugging" Margin="0" Loaded="Debugging_Loaded"/>
-                    <Line X1="-1E+99" X2="1E+99" Stroke="Black" Fill="Black" StrokeThickness="2"/>
+                    <Line X1="-1" X2="1" Stroke="Black" Fill="Black" StrokeThickness="2" Width="999999"/>
                 </Grid>
             </Grid>
         </material:PanBorder>
+        <material:MaterialButton x:Name="Open" Text="OPEN" Margin="5" Height="35" Width="100" CornerRadius="5" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#FFFF6161" Foreground="White" FontWeight="Bold" Click="Open_Click"/>
+        <Border x:Name="outputBorder" Background="#7F661717" Margin="3" CornerRadius="5" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <StackPanel>
+                <TextBlock Text="OUTPUT" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="Black" FontWeight="Bold"/>
+                <TextBox IsReadOnly="True" Text="" x:Name="output" FontFamily="Roboto" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="White" Background="{x:Null}" BorderBrush="{x:Null}"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </material:MaterialWindow>

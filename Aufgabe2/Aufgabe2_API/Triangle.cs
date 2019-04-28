@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Aufgabe2_API
 {
@@ -20,12 +16,6 @@ namespace Aufgabe2_API
                 triangle.c.Distance(triangle.a),
             };
 
-            /*angles = new[]
-            {
-                Math.Acos((lengths[0]*lengths[0]+lengths[2]*lengths[2]-lengths[1]*lengths[1]) / (2*lengths[0]*lengths[2])),
-                Math.Acos((lengths[1]*lengths[1]+lengths[1]*lengths[1]-lengths[2]*lengths[2]) / (2*lengths[0]*lengths[1])),
-                Math.Acos((lengths[1]*lengths[1]+lengths[2]*lengths[2]-lengths[0]*lengths[0]) / (2*lengths[1]*lengths[2])),
-            };*/
             angles = new[]
             {
                 MathHelper.SmallerAngleSide(triangle.a.Angle(triangle.b) - triangle.a.Angle(triangle.c)),
@@ -49,6 +39,11 @@ namespace Aufgabe2_API
     public class Triangle
     {
         public Vector a, b, c;
+        public Vector this[int index] => MathHelper.PositiveModulo(index, 0, 3).Let(x =>
+                x == 0 ? a
+            : x == 1 ? b
+            : x == 2 ? c
+            : throw new InvalidOperationException());
 
         public Triangle(Vector a, Vector b, Vector c)
         {
@@ -57,20 +52,22 @@ namespace Aufgabe2_API
             this.c = c;
         }
 
-        /*public Triangle(TriangleArchetype archetype, Vector positionOffset, double angleOffset)
-        {
-            a = positionOffset;
-            b = a + new Vector(archetype.angles[0] + angleOffset) * archetype.lengths[0];
-            c = b + new Vector(Math.PI + archetype.angles[0] + archetype.angles[1] + angleOffset) * archetype.lengths[1];
-            Debug.Assert(a.Approx(c + new Vector(archetype.angles[0] + archetype.angles[1] + archetype.angles[2] + angleOffset) * archetype.lengths[2], 1E-10));
-        }*/
-
         public Triangle(TriangleArchetype archetype, Vector positionOffset, double angleOffset)
         {
             a = positionOffset;
             b = a + new Vector(archetype.angles[0] + angleOffset) * archetype.lengths[0];
             c = a + new Vector(angleOffset) * archetype.lengths[2];
-            //Debug.Assert(a.Approx(c + new Vector(Math.PI + angleOffset - archetype.angles[1]) * archetype.lengths[1], 1E-10));
         }
+
+        public bool Intersects(Triangle other)
+        {
+            var edges = new[] { (a, b), (b, c), (c, a) };
+            var otherEdges = new[] { (other.a, other.b), (other.b, other.c), (other.c, other.a) };
+            return edges.Any(x => otherEdges.Any(y => Vector.IntersectingLines(x.Item1, x.Item2, y.Item1, y.Item2)));
+        }
+
+        public bool Surrounds(Vector other, double epsilon) =>
+            (Vector.OrientationApprox(a, b, other, epsilon), Vector.OrientationApprox(b, c, other, epsilon), Vector.OrientationApprox(c, a, other, epsilon))
+            .Let(x => x.Item1 == x.Item2 && x.Item2 == x.Item3 && x.Item1 != Vector.VectorOrder.Collinear);
     }
 }
