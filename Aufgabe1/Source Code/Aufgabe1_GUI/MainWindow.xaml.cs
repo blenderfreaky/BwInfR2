@@ -27,8 +27,8 @@ namespace Aufgabe1_GUI
             set
             {
                 _map = value;
-                Back.Margin = new Thickness(off, off + map.allPolygonVertices.Average(x => x.vector.y) * 2, off, off);
-                startingPosition = _map.startingPosition;
+                Back.Margin = new Thickness(off, off + (map.AllPolygonVertices.Average(x => x.vector.Y) * 2), off, off);
+                startingPosition = _map.StartingPosition;
             }
         }
 
@@ -45,7 +45,7 @@ namespace Aufgabe1_GUI
         {
             Polygons.Children.Clear();
 
-            foreach (var polygon in map.polygons)
+            foreach (var polygon in map.Polygons)
             {
                 Polygons.Children.Add(
                     new System.Windows.Shapes.Polygon
@@ -56,7 +56,7 @@ namespace Aufgabe1_GUI
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Center,
 
-                        Points = new PointCollection(polygon.vertices.Select(x => new Point(x.vector.x, -x.vector.y))),
+                        Points = new PointCollection(polygon.Vertices.Select(x => new Point(x.vector.X, -x.vector.Y))),
                     });
             }
         }
@@ -74,7 +74,7 @@ namespace Aufgabe1_GUI
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     
-                    Points = new PointCollection(map.busPath.Select(x => new Point(MathHelper.Clamp(x.x, -99999, 99999), -MathHelper.Clamp(x.y, -99999, 99999)))), //Values bigger than 199999 don't render properly
+                    Points = new PointCollection(map.BusPath.Select(x => new Point(MathHelper.Clamp(x.X, -99999, 99999), -MathHelper.Clamp(x.Y, -99999, 99999)))), //Values bigger than 199999 don't render properly
                 });
         }
 
@@ -91,10 +91,10 @@ namespace Aufgabe1_GUI
             if (fromMouse.IsToggledOn) DrawOptimalPathMouse();
             if (!(optimal.IsToggledOn || fromMouse.IsToggledOn)) outputBorder.Visibility = Visibility.Collapsed;
 
-            Vector Mix(Vertex vert, double length, double side) => vert.Next.vector - (vert.Next.vector - vert.vector).Let(x => x.Left * side + x).Normalize() * length;
-            if (direction.IsToggledOn) Debugging.DrawLines(map.polygons.SelectMany(x => x.SelectMany(y => new[] { (y.vector, y.Next.vector), (y.Next.vector, Mix(y, 5, -1)), (y.Next.vector, Mix(y, 5, 1)) })), Brushes.Orange, 0.75);
-            if (convexity.IsToggledOn) Debugging.DrawLines(map.allPolygonVertices.Where(x => !x.notConvex).Select(x => (x.vector - x.normal * 5, x.vector + x.normal * 5)), Brushes.Green, 0.75);
-            if (normals.IsToggledOn) Debugging.DrawLines(map.allPolygonVertices.Select(x => (x.vector, x.vector + x.normal * 5)), Brushes.Blue, 0.75);
+            Vector Mix(Vertex vert, double length, double side) => vert.Next.vector - ((vert.Next.vector - vert.vector).Let(x => (x.Left * side) + x).Normalize() * length);
+            if (direction.IsToggledOn) Debugging.DrawLines(map.Polygons.SelectMany(x => x.SelectMany(y => new[] { (y.vector, y.Next.vector), (y.Next.vector, Mix(y, 5, -1)), (y.Next.vector, Mix(y, 5, 1)) })), Brushes.Orange, 0.75);
+            if (convexity.IsToggledOn) Debugging.DrawLines(map.AllPolygonVertices.Where(x => !x.notConvex).Select(x => (x.vector - (x.normal * 5), x.vector + (x.normal * 5))), Brushes.Green, 0.75);
+            if (normals.IsToggledOn) Debugging.DrawLines(map.AllPolygonVertices.Select(x => (x.vector, x.vector + (x.normal * 5))), Brushes.Blue, 0.75);
         }
 
         private void DrawVisibilityPolygon(bool redraw = true)
@@ -110,7 +110,7 @@ namespace Aufgabe1_GUI
         {
             Point mousePositionPoint = Mouse.GetPosition(Navmap);
             Vector mousePosition = new Vector(mousePositionPoint.X, -mousePositionPoint.Y);
-            Vertex vert = map.allPolygonVertices.Concat(new[] { map.startingPosition }).MinValue(x => x.vector.Distance(mousePosition)).value;
+            Vertex vert = map.AllPolygonVertices.Concat(new[] { map.StartingPosition }).MinValue(x => x.vector.Distance(mousePosition)).value;
 
             DrawLines(map.GenerateVisibilityPolygon(vert, out _, out var debug).Select(x => (vert.vector, x.vector)), debug, redraw);
         }
@@ -122,13 +122,13 @@ namespace Aufgabe1_GUI
             DrawLines(map.GenerateDijkstraHeuristic(true, out _, out _, out var debug).Select(x => (x.Key.vector, x.Value.vector)), debug, redraw);
         private void DrawOptimalPathDefault(bool redraw = true)
         {
-            map.startingPosition = startingPosition;
+            map.StartingPosition = startingPosition;
             DrawOptimalPath(redraw);
         }
         private void DrawOptimalPathMouse(bool redraw = true)
         {
             Point mousePositionPoint = Mouse.GetPosition(Navmap);
-            map.startingPosition = new Vertex(new Vector(mousePositionPoint.X, -mousePositionPoint.Y));
+            map.StartingPosition = new Vertex(new Vector(mousePositionPoint.X, -mousePositionPoint.Y));
             DrawOptimalPath(redraw);
         }
         private void DrawOptimalPath(bool redraw = true)
@@ -146,10 +146,10 @@ namespace Aufgabe1_GUI
 
                 output.Text =
 $@"Startzeit: {(start - TimeSpan.FromSeconds(advantage)).ToLongTimeString()}
-Ankunft: {(start + TimeSpan.FromSeconds(busLength / map.busSpeed)).ToLongTimeString()}
-Fahrzeit: {TimeSpan.FromSeconds(busLength / map.busSpeed).ToString(@"hh\:mm\:ss\.ffff")}
-Laufzeit: {TimeSpan.FromSeconds(characterLength / map.characterSpeed).ToString(@"hh\:mm\:ss\.ffff")}
-Weg: {string.Join("\n    => ", Enumerable.Reverse(optimalPath).Select(x => $"({x.vector.x.ToString("0.####")}, {x.vector.y.ToString("0.####")})"))}";
+Ankunft: {(start + TimeSpan.FromSeconds(busLength / map.BusSpeed)).ToLongTimeString()}
+Fahrzeit: {TimeSpan.FromSeconds(busLength / map.BusSpeed).ToString(@"hh\:mm\:ss\.ffff")}
+Laufzeit: {TimeSpan.FromSeconds(characterLength / map.CharacterSpeed).ToString(@"hh\:mm\:ss\.ffff")}
+Weg: {string.Join("\n    => ", Enumerable.Reverse(optimalPath).Select(x => $"({x.vector.X.ToString("0.####")}, {x.vector.Y.ToString("0.####")})"))}";
             }
             catch (Exception) { }
         }

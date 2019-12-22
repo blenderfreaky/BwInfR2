@@ -23,11 +23,11 @@ namespace Aufgabe1_GUI
                         VerticalAlignment = VerticalAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Center,
 
-                        X1 = a.x,
-                        Y1 = -a.y,
+                        X1 = a.X,
+                        Y1 = -a.Y,
 
-                        X2 = b.x,
-                        Y2 = -b.y,
+                        X2 = b.X,
+                        Y2 = -b.Y,
                     }
                 );
             }

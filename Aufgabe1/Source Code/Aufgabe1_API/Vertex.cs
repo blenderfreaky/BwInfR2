@@ -54,16 +54,20 @@ namespace Aufgabe1_API
               a.polygon == null || b.polygon == null
             ? a.vector == b.vector
             : a.polygon == b.polygon && a.index == b.index;
+
         public static bool operator !=(Vertex a, Vertex b) => !(a == b);
+
         public override bool Equals(object obj) => obj is Vertex segment && this == segment;
+
         public override int GetHashCode()
         {
             var hashCode = -2056935238;
-            hashCode = hashCode * -1521134295 + EqualityComparer<Vector>.Default.GetHashCode(vector);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Polygon>.Default.GetHashCode(polygon);
-            hashCode = hashCode * -1521134295 + index.GetHashCode();
+            hashCode = (hashCode * -1521134295) + EqualityComparer<Vector>.Default.GetHashCode(vector);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<Polygon>.Default.GetHashCode(polygon);
+            hashCode = (hashCode * -1521134295) + index.GetHashCode();
             return hashCode;
         }
+
         public override string ToString() => $"{vector.ToString()} in {polygon?.ToString()} at {index}";
     }
 }

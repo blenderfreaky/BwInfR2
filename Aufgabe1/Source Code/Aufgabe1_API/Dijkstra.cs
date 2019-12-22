@@ -17,7 +17,7 @@ namespace Aufgabe1_API
             distance[start] = 0;
             path[start] = start;
 
-            void Step(Vertex current)
+            void step(Vertex current)
             {
                 foreach (var connection in (visitedNodesOut[current] = nodes[current]()))
                 {
@@ -34,7 +34,7 @@ namespace Aufgabe1_API
                 reachingRequired.Remove(current);
             }
             IComparer<Vertex> comparer = Comparer<Vertex>.Create((a, b) => distance[a].CompareTo(distance[b]));
-            while (priorityList.Any()) Step(priorityList.MinValue(x => distance.ContainsKey(x) ? distance[x] : double.PositiveInfinity).value);
+            while (priorityList.Any()) step(priorityList.MinValue(x => distance.ContainsKey(x) ? distance[x] : double.PositiveInfinity).value);
 
             visitedNodes = visitedNodesOut;
             return path.ToDictionary(x => x.Key, x => x.Value);
